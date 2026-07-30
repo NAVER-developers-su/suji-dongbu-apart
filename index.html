@@ -336,24 +336,6 @@
             <div class="line line--emph line--accent"><span class="line__label">총 이자</span><span class="line__value" id="lineTotalInterest2">0</span></div>
             <div class="line line--emph"><span class="line__label">만기 총 상환액</span><span class="line__value" id="lineMaturity">0</span></div>
           </div>
-          <div class="tablegroup">
-            <h3 class="card__title">이자 계산 방식별</h3>
-            <div class="scroll-x">
-              <table>
-                <thead>
-                  <tr>
-                    <th>구분</th>
-                    <th>이주비 이자</th>
-                    <th>이주비 이자의이자</th>
-                    <th>추가사업비 이자</th>
-                    <th>추가사업비 이자의이자</th>
-                    <th>총 이자</th>
-                  </tr>
-                </thead>
-                <tbody id="table2Body"></tbody>
-              </table>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -362,6 +344,22 @@
           <h2 class="card__title">금리 민감도<button type="button" class="help" data-help="mingam" aria-label="설명 보기">i</button></h2>
         </div>
         <div class="card__body">
+          <div class="tablegroup">
+            <h3 class="card__title">이주비 금리 민감도</h3>
+            <div class="scroll-x">
+              <table>
+                <thead>
+                  <tr>
+                    <th>이주비 금리</th>
+                    <th>이주비 이자</th>
+                    <th>이자의 이자</th>
+                    <th>총 이자</th>
+                  </tr>
+                </thead>
+                <tbody id="tableMoveRate"></tbody>
+              </table>
+            </div>
+          </div>
           <div class="tablegroup">
             <h3 class="card__title">추가사업비 금리 민감도</h3>
             <div class="scroll-x">

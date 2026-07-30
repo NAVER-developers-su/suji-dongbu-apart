@@ -162,7 +162,7 @@ const HELP = {
   mingam: {
     title: '금리 민감도',
     body:
-      '<p>추가사업비 금리가 오르면 총 이자가 얼마나 늘고 빌릴 수 있는 원금이 얼마나 줄어드는지 보여줍니다.</p>' +
+      '<p>금리가 오르면 총 이자가 얼마나 느는지 보여줍니다. 이주비 금리는 실행일에야 확정되고, 추가사업비 금리는 CD에 연동돼 3개월마다 바뀌므로 둘 다 지금은 가정입니다.</p>' +
       '<p>금리가 오르면 이자계수가 커져서 같은 한도 안에 담을 수 있는 원금이 줄어듭니다. 즉 <b>이자는 늘고 손에 쥐는 돈은 줄어듭니다.</b></p>' +
       '<div class="helpsheet__note">참고: 조합 발표치는 금리와 무관한 고정 비율(1억당 2,672만)이라, 이 표는 조합 시트(단리) 기준으로 계산합니다.</div>',
   },
@@ -475,26 +475,22 @@ function updateSettingsPanel(r) {
 
 /* ── 경우별 비교 표 ──────────────────────────── */
 
-function renderTable2(unit) {
-  const bases = [
-    { key: 'sheet', label: '조합 시트 (단리)' },
-    { key: 'notice', label: '조합 발표치' },
-  ];
+function renderTableMove(unit) {
+  const base = Math.round(state.moveRate * 100) / 100;
+  const rates = buildRateSweep(base);
   let html = '';
-  bases.forEach(b => {
-    const s2 = Object.assign({}, state, { addBasis: b.key });
+  rates.forEach(rate => {
+    const s2 = Object.assign({}, state, { moveRate: rate });
     const r = computeAll(unit, s2);
-    const isCurrent = state.addBasis === b.key;
+    const isCurrent = rate === base;
     html += `<tr${isCurrent ? ' data-current="1"' : ''}>` +
-      `<th>${b.label}${isCurrent ? '<span class="pill">현재</span>' : ''}</th>` +
+      `<th>${rate.toFixed(2)}%${isCurrent ? '<span class="pill">현재</span>' : ''}</th>` +
       `<td>${won(r.moveInterest)}</td>` +
-      `<td>${won(r.moveIoi)}</td>` +
-      `<td>${won(r.addInterest)}</td>` +
-      `<td>${won(r.addIoi)}</td>` +
+      `<td>${state.moveIoi === 'none' ? '—' : won(r.moveIoi)}</td>` +
       `<td>${won(r.totalInterest)}</td>` +
       `</tr>`;
   });
-  document.getElementById('table2Body').innerHTML = html;
+  document.getElementById('tableMoveRate').innerHTML = html;
 }
 
 function buildRateSweep(base) {
@@ -617,7 +613,7 @@ function render() {
   updateResults(r);
   updateSettingsPanel(r);
 
-  renderTable2(unit);
+  renderTableMove(unit);
   renderTable3(unit);
 }
 
