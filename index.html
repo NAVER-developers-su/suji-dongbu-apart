@@ -108,7 +108,7 @@
       </section>
 
       <details class="card" id="settings">
-        <summary><span class="caret">▶</span>상세 설정<span class="summary__hint" id="settingsHint">5.28% · 55개월 · 조합 대납</span></summary>
+        <summary><span class="caret">▶</span>상세 설정<span class="summary__hint" id="settingsHint">5.28% · 55개월 · 조합 발표치</span></summary>
         <div class="card__body">
           <div class="settings">
             <div class="setting">
@@ -170,11 +170,20 @@
               </div>
             </div>
             <div class="setting setting--wide">
-              <div class="setting__label">이자 계산 방식<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
+              <div class="setting__label">추가사업비 이자 기준<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
               <div class="segmented">
-                <label><input type="radio" name="method" value="simple">단리</label>
-                <label><input type="radio" name="method" value="proxy" checked>조합 대납</label>
+                <label><input type="radio" name="addBasis" value="sheet">조합 시트 (단리)</label>
+                <label><input type="radio" name="addBasis" value="notice" checked>조합 발표치</label>
               </div>
+              <div class="setting__note">조합 발표치는 2026.07.30 안내문 기준 1억당 이자 26,720,000원 · 이자의 이자 570,000원입니다.</div>
+            </div>
+            <div class="setting setting--wide">
+              <div class="setting__label">이주비 이자의 이자<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></div>
+              <div class="segmented">
+                <label><input type="radio" name="moveIoi" value="none" checked>없음</label>
+                <label><input type="radio" name="moveIoi" value="proxy">조합 대납</label>
+              </div>
+              <div class="setting__note">조합이 공표한 값이 없어 기본값은 없음입니다. 안내문상 조합이 사업비 대출로 이자를 대납하는 구조라, 그 비용을 가늠하려면 조합 대납을 선택하세요.</div>
             </div>
             <div class="setting">
               <div class="setting__label">십만원 단위 절사·올림<button type="button" class="help" data-help="rounding" aria-label="설명 보기">i</button></div>
@@ -318,22 +327,21 @@
         </div>
         <div class="card__body">
           <div class="lines">
-            <div class="line">
-              <span class="line__label">이주비 이자</span>
-              <span class="line__value" id="lineMoveInterest">0</span>
-            </div>
-            <div class="line">
-              <span class="line__label">추가사업비 이자</span>
-              <span class="line__value" id="lineAddInterest">0</span>
-            </div>
-            <div class="line line--warnish">
-              <span class="line__label">이자의 이자 (조합 대납분)<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></span>
-              <span class="line__value" id="lineIoi">—</span>
-            </div>
-            <div class="line line--emph line--accent">
-              <span class="line__label">총 이자</span>
-              <span class="line__value" id="lineTotalInterest2">0</span>
-            </div>
+            <div class="line line--head"><span class="line__label">이주비 대출</span><span class="line__value" id="headMoveRate"></span></div>
+            <div class="line"><span class="line__label">대출 원금</span><span class="line__value" id="lineMovePrincipal2">0</span></div>
+            <div class="line"><span class="line__label">이자</span><span class="line__value" id="lineMoveInterest">0</span></div>
+            <div class="line line--warnish"><span class="line__label">이자의 이자<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></span><span class="line__value" id="lineMoveIoi">—</span></div>
+            <div class="line line--emph"><span class="line__label">소계</span><span class="line__value" id="lineMoveSub">0</span></div>
+
+            <div class="line line--head"><span class="line__label">추가사업비 대출</span><span class="line__value" id="headAddRate"></span></div>
+            <div class="line"><span class="line__label">대출 원금</span><span class="line__value" id="lineAddPrincipal2">0</span></div>
+            <div class="line"><span class="line__label">이자</span><span class="line__value" id="lineAddInterest">0</span></div>
+            <div class="line line--warnish"><span class="line__label">이자의 이자<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></span><span class="line__value" id="lineAddIoi">—</span></div>
+            <div class="line line--emph"><span class="line__label">소계</span><span class="line__value" id="lineAddSub">0</span></div>
+
+            <div class="line line--emph line--total"><span class="line__label">총 대출(실수령)</span><span class="line__value" id="lineTotalLoan2">0</span></div>
+            <div class="line line--emph line--accent"><span class="line__label">총 이자</span><span class="line__value" id="lineTotalInterest2">0</span></div>
+            <div class="line line--emph"><span class="line__label">만기 총 상환액</span><span class="line__value" id="lineMaturity">0</span></div>
           </div>
           <div class="tablegroup">
             <h3 class="card__title">이자 계산 방식별</h3>
@@ -343,8 +351,9 @@
                   <tr>
                     <th>구분</th>
                     <th>이주비 이자</th>
+                    <th>이주비 이자의이자</th>
                     <th>추가사업비 이자</th>
-                    <th>이자의 이자</th>
+                    <th>추가사업비 이자의이자</th>
                     <th>총 이자</th>
                   </tr>
                 </thead>
@@ -383,14 +392,115 @@
   </div>
 
   <footer class="foot">
-    <strong>계산 근거</strong>
-    <ul>
-      <li>감정평가액·분담금: 2026년 정기총회 책자 303~319쪽 (612세대) — 사진 판독 후 산술 검증</li>
-      <li>한도 공식: 추가사업비 대여 신청 최종 신청서 — 추가사업비 한도 = 종후자산 LTV 90% − 분담금 − 이주비 대출 신청금액</li>
-      <li>이자: 조합 공식 계산시트 기준 원금 × 연이율 ÷ 12 × 개월수 (단리), 십만원 단위 절사·올림</li>
-      <li>금리와 이자 계산 방식은 조합 확정 전이라 상세 설정에서 바꿔 비교할 수 있습니다</li>
-      <li>이 페이지는 참고용 추정치이며 실제 대출 조건은 조합·금융기관 안내를 따릅니다</li>
-    </ul>
+    <h2 class="foot__title">참고 — 산정 근거</h2>
+
+    <details class="ref">
+      <summary><span class="caret">▶</span>세대 데이터 (감정평가액 · 분담금)</summary>
+      <div class="ref__body">
+        <p>종전·종후 감정평가액, 권리가액, 분담금은 <b>2026년 정기총회 책자 303~319쪽</b>의
+        조합원 세대별 분담금표(612세대 전량)를 판독한 값입니다.</p>
+        <p>판독 오류를 막기 위해 전 세대를 산술로 검증했습니다: 종전·종후 평균이 삼창·대화
+        두 감정평가법인 값의 정확한 평균인지, 권리가액이 종전평균 × 비례율 109.10%와 맞는지,
+        분담금이 종후평균 − 권리가액과 일치하는지 — <b>612세대 전부 통과</b>, 동·호수 중복과
+        누락 0건.</p>
+        <p class="ref__src">출처: 2026 정기총회 책자 (08호 안건)</p>
+      </div>
+    </details>
+
+    <details class="ref">
+      <summary><span class="caret">▶</span>대출 한도 공식</summary>
+      <div class="ref__body">
+        <p><b>이주비 대출 한도</b> — 매수 시기에 따라 종전 감정평가액의 60% 또는 40%입니다.
+        2025.06.27 이전 매수는 60%(다주택자 동일), 2025.10.15 이후 매수는 40%,
+        그 사이 매수는 조합 별도 상담 대상입니다.</p>
+        <p><b>추가사업비 대출 한도</b> — 신청서의 공식 그대로입니다. 신청서에는 원금과 이자를
+        합한 금액을 적기 때문에, 실수령 원금은 한도를 이자계수로 나눈 값이 됩니다.</p>
+        <code>잔여한도 = 종후평가액 × LTV 90% − 분담금 − 이주비 신청액
+        (이주비 미신청 시 기존 주담대 실제 잔액을 대신 차감)
+원금한도 = 잔여한도 ÷ (1 + 이자계수)</code>
+        <p>십만원 단위 처리(한도 절사·이자 올림)는 조합 공식 계산시트 방식입니다.</p>
+        <p class="ref__src">출처: 추가사업비 대여 신청 최종 신청서 · 2차 수요 조사서 · 조합
+        공식 계산시트 · 조합 Q&amp;A (2026.07.21/28)</p>
+      </div>
+    </details>
+
+    <details class="ref">
+      <summary><span class="caret">▶</span>이주비 대출 조건</summary>
+      <div class="ref__body">
+        <ul>
+          <li>취급은행 신한은행 — 금리 <b>Cofix(6개월물) + 가산 1.60%</b></li>
+          <li>6/25 대의원회 선정 당시 가산 1.50%로 <b>4.4%</b>였으나, 7/14 취급지점 철회 후
+          7/23 새 지점 제안에서 <b>0.1%p 인상</b> → 기본값 4.5%</li>
+          <li>대출 기간: 신한은행 제안 기준 <b>대출실행일로부터 60개월 이내</b>
+          (총회 승인 기간은 55개월 — 기본값은 55개월, 상세 설정에서 조절)</li>
+          <li>원금 만기일시납 · 이자 후불 · <b>중도상환 가능, 수수료 없음</b></li>
+          <li>금리는 자서 시점이 아니라 <b>대출금이 실행되는 날</b> 확정 (6개월 변동금리)</li>
+          <li>이주비를 받으면 기존 주택담보대출은 상환 필수</li>
+        </ul>
+        <p class="ref__src">출처: 이주비 대출 관련 안내문 (2026.07.30) · 조합 Q&amp;A (2026.07.21)</p>
+      </div>
+    </details>
+
+    <details class="ref">
+      <summary><span class="caret">▶</span>추가사업비 대출 조건</summary>
+      <div class="ref__body">
+        <ul>
+          <li>취급 키움증권 — 금리 <b>CD 91일물 + 가산 2.22% + 취급수수료 0.14%</b>
+          (CD 2.92% 기준 연 5.28%, 3개월 변동)</li>
+          <li>만기 <b>55개월</b> · 만기일시상환 · <b>중도상환 불가</b> (HUG 사업비 상환 후
+          후순위 채권)</li>
+          <li>총액: 총회 가결 400억 + 키움 추가제안 87억. 400억 초과 시 총회 의결 필요</li>
+          <li>조합 안내: 향후 금리가 변동해도 개인별 한도액은 변동 없음</li>
+          <li>매매 시 승계 가능 (이주비는 60%로 받은 경우 매수자에게 40%까지만 승계)</li>
+        </ul>
+        <p class="ref__src">출처: 추가사업비 대출 관련 안내문 (2026.07.30) · 2차 수요 조사서 ·
+        조합 Q&amp;A (2026.07.21/28)</p>
+      </div>
+    </details>
+
+    <details class="ref">
+      <summary><span class="caret">▶</span>이자 계산 — 기준이 둘인 이유</summary>
+      <div class="ref__body">
+        <p>추가사업비 이자에 대해 조합이 내놓은 숫자가 <b>서로 다른 두 가지</b>라, 계산기도
+        둘 다 제공합니다.</p>
+        <p><b>① 조합 시트 (단리)</b> — 조합이 배포한 엑셀 계산시트의 산식입니다. 1억당
+        24,200,000원.</p>
+        <code>이자 = 원금 × 연이율 ÷ 12 × 개월수</code>
+        <p><b>② 조합 발표치 (기본값)</b> — 2026.07.30 안내문에 실린 값입니다. 추가 이주비
+        1억당 <b>대출금 이자 약 26,720,000원 + 이자의 이자 약 570,000원</b>. 계산기는 이
+        비율을 원금에 그대로 적용합니다.</p>
+        <p>발표치 26.72%는 단리 55개월(24.20%)과 맞지 않고 <b>월복리 54개월(26.75%)에
+        가깝습니다</b>. 안내문에 금리가 "단리"로 표기돼 있지만 실제 계산은 복리로 이루어졌을
+        가능성이 있습니다.</p>
+        <p><b>이주비 이자의 이자</b> — 이주비 이자는 은행 조건상 매월 후취라, 조합이 사업비
+        대출을 받아 대납하고 조합원은 입주 때 정산하는 구조입니다. 다만 그 대납금에 붙는
+        이자를 개인에게 청구할지는 <b>조합이 공표한 바 없어 기본값은 "없음"</b>입니다.
+        가늠해보고 싶으면 상세 설정에서 "조합 대납"을 선택하세요.</p>
+        <code>조합 대납 추정 = 이주비원금 × (이주비금리÷12) × (사업비금리÷12) × n(n−1)÷2</code>
+        <p class="ref__src">출처: 조합 공식 계산시트 (260727) · 추가사업비/이주비 대출 관련
+        안내문 (2026.07.30)</p>
+      </div>
+    </details>
+
+    <details class="ref">
+      <summary><span class="caret">▶</span>아직 확정되지 않은 것</summary>
+      <div class="ref__body">
+        <ul>
+          <li><b>이주비 금리</b> — 실행일에 확정. 대의원회 추인도 예정 단계</li>
+          <li><b>이주비 이자 정산 방식</b> — 조합이 신한은행에 이자 계산서를 요청할 예정
+          (2026.07.30 기준 미수령)</li>
+          <li><b>추가분담금</b> — 일반분양 수익과 공사비가 확정되지 않아 미정. 최종 잔금 전
+          확정되어 잔금에 합산</li>
+          <li><b>대출 기간</b> — 개인별 이주·입주 시점에 따라 실제 기간은 짧아질 수 있음</li>
+        </ul>
+        <p>이 때문에 금리·기간·이자 기준을 상세 설정에서 전부 바꿔볼 수 있게 만들었습니다.
+        조합 확정값이 나오면 기본값을 갱신합니다.</p>
+      </div>
+    </details>
+
+    <p class="foot__disclaimer">이 페이지는 참고용 추정치입니다. 실제 대출 조건과 금액은
+    조합과 금융기관의 공식 안내를 따릅니다. 데이터 판독·산식 해석 오류가 있을 수 있으니
+    중요한 결정 전에는 반드시 조합에 확인하세요.</p>
   </footer>
 
 </div>

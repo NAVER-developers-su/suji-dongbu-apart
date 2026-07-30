@@ -33,6 +33,10 @@ function normalizeUnit(u) {
 const GASAN = 2.22;
 const FEE = 0.14;
 
+// 2026-07-30 조합 안내문: 추가 이주비 1억당 이자 26,720,000원, 이자의 이자 570,000원
+const NOTICE_ADD_INTEREST_RATE = 0.2672;
+const NOTICE_ADD_IOI_RATE = 0.0057;
+
 const DEFAULTS = {
   cd: 2.92,
   moveRate: 4.50,
@@ -41,11 +45,10 @@ const DEFAULTS = {
   ltvAfter: 90,
   ltvBefore: 60,
   existing: 0,
-  method: 'proxy',
+  addBasis: 'notice',
+  moveIoi: 'none',
   rounding: 'on',
 };
-
-const METHOD_LABEL = { simple: '단리', proxy: '조합 대납' };
 
 const HELP = {
   jongjeon: {
@@ -118,7 +121,7 @@ const HELP = {
       '<p>은행끼리 91일 동안 돈을 빌릴 때 쓰는 <b>기준금리</b>입니다. 추가사업비 대출 금리가 여기에 연동됩니다.</p>' +
       '<code>추가사업비 금리 = CD 91일물 + 가산금리 2.22% + 취급수수료 0.14%</code>' +
       '<p>3개월마다 CD금리가 다시 정해지므로 대출 금리도 따라 바뀝니다.</p>' +
-      '<div class="helpsheet__note">참고: 2026년 6월 18일 기준 2.92%였고, 이때 합계가 연 5.28%였습니다.</div>',
+      '<div class="helpsheet__note">참고: 2026년 6월 14일 기준 2.92%였고, 이때 합계가 연 5.28%였습니다.</div>',
   },
   gigan: {
     title: '대출 기간',
@@ -128,12 +131,12 @@ const HELP = {
       '<div class="helpsheet__note">참고: 신한은행 이주비 대출 제안서에는 대출실행일로부터 60개월 이내로 적혀 있어, 이주비 기간은 따로 조절할 수 있게 두었습니다.</div>',
   },
   bangsik: {
-    title: '이자 계산 방식',
+    title: '추가사업비 이자 기준',
     body:
-      '<p>두 대출 모두 만기에 한 번에 갚고 이자도 후불이라, <b>쌓인 이자를 어떻게 처리하느냐</b>에 따라 총액이 달라집니다.</p>' +
-      '<p><b>단리</b>는 조합 공식 계산시트와 똑같이 원금에만 이자를 붙입니다. 서류에 적을 숫자를 맞춰볼 때 쓰세요.</p>' +
-      '<p><b>조합 대납</b>은 조합 안내문에 적힌 실제 구조입니다. 이주비 이자는 은행 조건상 매달 내야 하는데 조합원은 입주 때까지 내지 않으므로, 조합이 사업비 대출을 받아 대신 내주고 그 대납금에 이자가 붙습니다.</p>' +
-      '<div class="helpsheet__note">참고: 조합도 아직 신한은행에서 정확한 이자 계산서를 받지 못한 상태입니다.</div>',
+      '<p>추가사업비 대출의 이자를 <b>어떤 기준으로 계산할지</b> 정합니다.</p>' +
+      '<p><b>조합 시트(단리)</b>는 조합 공식 계산시트와 똑같이 원금 × 연이율 ÷ 12 × 개월수로 계산합니다.</p>' +
+      '<p><b>조합 발표치</b>는 2026년 7월 30일 조합 안내문에 실린 실제 값입니다. 추가 이주비 1억원당 대출금 이자 26,720,000원, 이자의 이자 570,000원이 붙는다고 안내했습니다 — 즉 추가사업비도 단순 단리 계산보다 이자가 더 붙는다는 뜻입니다.</p>' +
+      '<div class="helpsheet__note">참고: 조합은 이 값이 현재 금리로 일괄계산한 금액이며 단리 기준이라고 밝혔습니다. 조합도 아직 신한은행에서 정확한 이자 계산서를 받지 못한 상태입니다.</div>',
   },
   rounding: {
     title: '십만원 단위 절사·올림',
@@ -148,12 +151,13 @@ const HELP = {
   ioni: {
     title: '이자의 이자',
     body:
-      '<p>이주비 이자는 은행 조건상 <b>매달 내야만</b> 합니다. 그런데 조합원은 입주할 때까지 내지 않기로 했기 때문에, 그 사이 <b>조합이 사업비 대출을 받아 대신 내줍니다.</b> 조합이 빌린 그 돈에 다시 이자가 붙고, 입주할 때 조합원이 함께 갚습니다.</p>' +
-      '<code>이자의 이자 = 이주비원금 × (이주비금리÷12) × (추가사업비금리÷12) × n(n−1)÷2</code>' +
-      '<p>매달 발생한 이자가 만기까지 남은 개월 수만큼 이자를 낳기 때문에 n(n−1)÷2 항이 나옵니다.</p>' +
-      '<div class="helpsheet__note">참고: 복리가 아니라 별도 대출에서 생기는 이자입니다. 추가사업비에는 붙지 않습니다 — 신청액에 이자가 이미 포함돼 대납할 것이 없기 때문입니다.</div>',
-  },
-  mingam: {
+      '<p>만기까지 이자를 한 푼도 내지 않기 때문에, <b>그 사이 쌓인 이자에 다시 붙는 이자</b>입니다. 두 대출은 근거가 다릅니다.</p>' +
+      '<p><b>추가사업비</b> — 조합이 2026.07.30 안내문에서 <b>1억당 이자의 이자 약 570,000원</b>이라고 공표했습니다. 기본값(조합 발표치)이 이 비율을 그대로 적용합니다. 조합 시트(단리)를 고르면 0이 됩니다.</p>' +
+      '<p><b>이주비</b> — 이주비 이자는 은행 조건상 매월 후취라, 조합이 사업비 대출을 받아 대납하고 조합원은 입주 때 정산합니다. 다만 대납금에 붙는 이자를 개인에게 청구할지는 <b>조합이 공표한 바 없어 기본값은 "없음"</b>입니다. 조합도 신한은행 이자 계산서를 기다리는 중입니다.</p>' +
+      '<code>조합 대납 추정 = 이주비원금 × (이주비금리÷12) × (사업비금리÷12) × n(n−1)÷2</code>' +
+      '<p>매달 대납된 이자가 만기까지 남은 개월 수만큼 이자를 낳아 n(n−1)÷2 항이 나옵니다.</p>' +
+      '<div class="helpsheet__note">참고: 원금에 이자가 합쳐지는 복리와 달리, 별도 대출(사업비 대출)에서 생기는 비용입니다.</div>',
+  },  mingam: {
     title: '금리 민감도',
     body:
       '<p>추가사업비 금리가 오르면 총 이자가 얼마나 늘고 빌릴 수 있는 원금이 얼마나 줄어드는지 보여줍니다.</p>' +
@@ -205,9 +209,11 @@ function computeAll(unit, s) {
   const nMove = s.monthsMove;
   const nAdd = s.months;
 
-  // 두 대출 모두 각자 원금에 대해서는 단리로만 이자가 붙는다.
-  const fMove = rMove / 12 * nMove;
-  const fAdd = rAdd / 12 * nAdd;
+  // 추가사업비 이자계수: 조합 발표치(2026.07.30 안내문의 1억당 정률)를 쓰거나,
+  // 조합 공식 계산시트 그대로 단리(원금 × 연이율 ÷ 12 × 개월)를 쓴다.
+  // 이주비는 항상 단리다.
+  const addFactor = (s.addBasis === 'notice') ? NOTICE_ADD_INTEREST_RATE : (rAdd / 12 * nAdd);
+  const moveFactor = rMove / 12 * nMove;
 
   const totalCap = unit.종후평균 * s.ltvAfter / 100;
   const moveCap = (s.mode === 'none') ? 0 : (unit.종전평균 * s.ltvBefore / 100);
@@ -216,9 +222,8 @@ function computeAll(unit, s) {
   const deduct = (s.mode === 'none') ? s.existing : moveAmount;
   const bucket = Math.max(0, totalCap - deduct - unit.분담금);
 
-  // 한도 공식은 조합 공식 계산시트 기준이라 이자 계산 방식과 무관하게
-  // 추가사업비의 단리 팩터만 사용한다.
-  let addPrincipalCap = bucket / (1 + fAdd);
+  // 한도는 실제로 적용할 이자계수(addFactor)와 일관되게 계산한다.
+  let addPrincipalCap = bucket / (1 + addFactor);
   addPrincipalCap = (s.rounding === 'on')
     ? Math.floor(addPrincipalCap / 100000) * 100000
     : addPrincipalCap;
@@ -226,32 +231,41 @@ function computeAll(unit, s) {
 
   const addPrincipal = s.amtAdd;
 
-  const moveInterest = Math.round(moveAmount * fMove);
-  let addInterest = addPrincipal * fAdd;
-  addInterest = (s.rounding === 'on')
-    ? Math.ceil(addInterest / 100000) * 100000
-    : Math.round(addInterest);
-  const addApplied = addPrincipal + addInterest;
+  const moveInterest = Math.round(moveAmount * moveFactor);
 
-  // 이자의 이자(이주비 전용): 이주비 이자는 은행 조건상 매월 후취라, 조합이
-  // 사업비 대출을 받아 대납하고 그 대납금에 사업비 금리가 붙는다. k개월차
-  // 대납금은 만기까지 (n−k)개월간 이자가 발생하므로 합이 n(n−1)/2 항이 된다.
-  // 추가사업비는 신청액 자체에 이자가 이미 포함되어 조합이 대납할 필요가
-  // 없으므로 이자의 이자가 발생하지 않는다.
-  const iOnI = (s.method === 'proxy')
+  // 이주비 이자의 이자: 이주비 이자는 은행 조건상 매월 후취라, 조합이 사업비
+  // 대출을 받아 대납하고 그 대납금에 사업비 금리가 붙는다. k개월차 대납금은
+  // 만기까지 (n−k)개월간 이자가 발생하므로 합이 n(n−1)/2 항이 된다.
+  const moveIoi = (s.moveIoi === 'proxy')
     ? Math.round(moveAmount * (rMove / 12) * (rAdd / 12) * nMove * (nMove - 1) / 2)
     : 0;
 
+  let addInterest = addPrincipal * addFactor;
+  addInterest = (s.rounding === 'on')
+    ? Math.ceil(addInterest / 100000) * 100000
+    : Math.round(addInterest);
+
+  // 추가사업비 이자의 이자: 조합 발표치 기준에서는 실제로 발생한다(1억당
+  // 570,000원). 조합 시트(단리) 기준에서는 신청액에 이자가 이미 포함되어
+  // 있다고 가정하므로 0이다.
+  const addIoi = (s.addBasis === 'notice') ? Math.round(addPrincipal * NOTICE_ADD_IOI_RATE) : 0;
+
+  const addApplied = addPrincipal + addInterest;
+
+  const moveSubtotal = moveAmount + moveInterest + moveIoi;
+  const addSubtotal = addPrincipal + addInterest + addIoi;
+
   const totalLoan = moveAmount + addPrincipal;
-  const totalInterest = moveInterest + addInterest + iOnI;
+  const totalInterest = moveInterest + moveIoi + addInterest + addIoi;
   const maturityTotal = totalLoan + totalInterest;
 
   return {
-    addRatePct, fMove, fAdd,
+    addRatePct, moveFactor, addFactor,
     totalCap, moveCap, moveAmount, deduct, bucket,
     addPrincipalCap, addCapInterest, addPrincipal,
     moveInterest, addInterest, addApplied,
-    iOnI, totalLoan, totalInterest, maturityTotal,
+    moveIoi, addIoi, moveSubtotal, addSubtotal,
+    totalLoan, totalInterest, maturityTotal,
   };
 }
 
@@ -279,7 +293,8 @@ const state = {
   ltvAfter: DEFAULTS.ltvAfter,
   ltvBefore: DEFAULTS.ltvBefore,
   existing: DEFAULTS.existing,
-  method: DEFAULTS.method,
+  addBasis: DEFAULTS.addBasis,
+  moveIoi: DEFAULTS.moveIoi,
   rounding: DEFAULTS.rounding,
 };
 
@@ -406,23 +421,42 @@ function updateResults(r) {
   document.getElementById('totalValue').textContent = won(r.maturityTotal);
   document.getElementById('totalKor').textContent = kor(r.maturityTotal);
   document.getElementById('lineMovePrincipal').textContent = won(r.moveAmount);
-  document.getElementById('lineMoveInterest').textContent = won(r.moveInterest);
   document.getElementById('lineAddPrincipal').textContent = won(r.addPrincipal);
   document.getElementById('lineAddApplied').textContent = won(r.addApplied);
-  document.getElementById('lineAddInterest').textContent = won(r.addInterest);
   document.getElementById('lineTotalLoan').textContent = won(r.totalLoan);
   document.getElementById('lineTotalInterest').textContent = won(r.totalInterest);
+
+  // 이주비 대출 블록
+  document.getElementById('headMoveRate').textContent =
+    `연 ${state.moveRate.toFixed(2)}% · ${state.monthsMove}개월`;
+  document.getElementById('lineMovePrincipal2').textContent = won(r.moveAmount);
+  document.getElementById('lineMoveInterest').textContent = won(r.moveInterest);
+  document.getElementById('lineMoveIoi').textContent =
+    (state.moveIoi === 'none') ? '—' : won(r.moveIoi);
+  document.getElementById('lineMoveSub').textContent = won(r.moveSubtotal);
+
+  // 추가사업비 대출 블록
+  document.getElementById('headAddRate').textContent = (state.addBasis === 'notice')
+    ? `조합 발표치 ${(NOTICE_ADD_INTEREST_RATE * 100).toFixed(2)}%`
+    : `연 ${r.addRatePct.toFixed(2)}% · ${state.months}개월`;
+  document.getElementById('lineAddPrincipal2').textContent = won(r.addPrincipal);
+  document.getElementById('lineAddInterest').textContent = won(r.addInterest);
+  document.getElementById('lineAddIoi').textContent =
+    (state.addBasis !== 'notice') ? '—' : won(r.addIoi);
+  document.getElementById('lineAddSub').textContent = won(r.addSubtotal);
+
+  document.getElementById('lineTotalLoan2').textContent = won(r.totalLoan);
   document.getElementById('lineTotalInterest2').textContent = won(r.totalInterest);
-  document.getElementById('lineIoi').textContent =
-    (state.method === 'simple') ? '—' : won(r.iOnI);
+  document.getElementById('lineMaturity').textContent = won(r.maturityTotal);
 
   document.getElementById('barInterest').textContent = won(r.totalInterest);
   document.getElementById('barTotal').textContent = won(r.maturityTotal);
 }
 
 function updateSettingsPanel(r) {
+  const basisLabel = (state.addBasis === 'notice') ? '조합 발표치' : '조합 시트';
   document.getElementById('settingsHint').textContent =
-    `${r.addRatePct.toFixed(2)}% · ${state.months}개월 · ${METHOD_LABEL[state.method]}`;
+    `${r.addRatePct.toFixed(2)}% · ${state.months}개월 · ${basisLabel}`;
 
   document.getElementById('rateBreakdown').innerHTML =
     `추가사업비 금리 = CD ${state.cd.toFixed(2)}% + 가산 ${GASAN.toFixed(2)}% + ` +
@@ -465,20 +499,21 @@ function renderTable1(unit) {
 }
 
 function renderTable2(unit) {
-  const methods = [
-    { key: 'simple', label: '단리' },
-    { key: 'proxy', label: '조합 대납' },
+  const bases = [
+    { key: 'sheet', label: '조합 시트 (단리)' },
+    { key: 'notice', label: '조합 발표치' },
   ];
   let html = '';
-  methods.forEach(m => {
-    const s2 = Object.assign({}, state, { method: m.key });
+  bases.forEach(b => {
+    const s2 = Object.assign({}, state, { addBasis: b.key });
     const r = computeAll(unit, s2);
-    const isCurrent = state.method === m.key;
+    const isCurrent = state.addBasis === b.key;
     html += `<tr${isCurrent ? ' data-current="1"' : ''}>` +
-      `<th>${m.label}${isCurrent ? '<span class="pill">현재</span>' : ''}</th>` +
+      `<th>${b.label}${isCurrent ? '<span class="pill">현재</span>' : ''}</th>` +
       `<td>${won(r.moveInterest)}</td>` +
+      `<td>${won(r.moveIoi)}</td>` +
       `<td>${won(r.addInterest)}</td>` +
-      `<td>${m.key === 'simple' ? '—' : won(r.iOnI)}</td>` +
+      `<td>${won(r.addIoi)}</td>` +
       `<td>${won(r.totalInterest)}</td>` +
       `</tr>`;
   });
@@ -719,9 +754,16 @@ function bindEvents() {
     });
   });
 
-  document.querySelectorAll('input[name="method"]').forEach(radio => {
+  document.querySelectorAll('input[name="addBasis"]').forEach(radio => {
     radio.addEventListener('change', () => {
-      state.method = radio.value;
+      state.addBasis = radio.value;
+      render();
+    });
+  });
+
+  document.querySelectorAll('input[name="moveIoi"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      state.moveIoi = radio.value;
       render();
     });
   });
@@ -741,7 +783,8 @@ function bindEvents() {
     state.ltvAfter = DEFAULTS.ltvAfter;
     state.ltvBefore = DEFAULTS.ltvBefore;
     state.existing = DEFAULTS.existing;
-    state.method = DEFAULTS.method;
+    state.addBasis = DEFAULTS.addBasis;
+    state.moveIoi = DEFAULTS.moveIoi;
     state.rounding = DEFAULTS.rounding;
 
     document.getElementById('setCd').textContent = DEFAULTS.cd.toFixed(2);
@@ -751,7 +794,8 @@ function bindEvents() {
     document.getElementById('setLtvAfter').textContent = String(DEFAULTS.ltvAfter);
     document.getElementById('setLtvBefore').textContent = String(DEFAULTS.ltvBefore);
     document.getElementById('setExisting').value = won(DEFAULTS.existing);
-    document.querySelector('input[name="method"][value="' + DEFAULTS.method + '"]').checked = true;
+    document.querySelector('input[name="addBasis"][value="' + DEFAULTS.addBasis + '"]').checked = true;
+    document.querySelector('input[name="moveIoi"][value="' + DEFAULTS.moveIoi + '"]').checked = true;
     document.querySelector('input[name="rounding"][value="' + DEFAULTS.rounding + '"]').checked = true;
 
     render();
