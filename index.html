@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>수지동부아파트 리모델링 대출 계산기</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead__id">
+      <span class="mark">동부</span>
+      <div class="masthead__text">
+        <h1>수지동부아파트 리모델링 대출 계산기</h1>
+        <p class="masthead__sub">이주비·추가사업비 대출 한도와 이자를 세대별로 계산합니다</p>
+      </div>
+    </div>
+    <p class="masthead__note">비례율 109.10% · 612세대 · <b>참고용 추정치</b></p>
+  </header>
+
+  <section class="picker">
+    <div class="picker__row">
+      <label class="field">
+        <span class="field__label">동</span>
+        <select id="selDong"></select>
+      </label>
+      <label class="field">
+        <span class="field__label">층</span>
+        <select id="selFloor"></select>
+      </label>
+      <label class="field">
+        <span class="field__label">호</span>
+        <select id="selHo"></select>
+      </label>
+    </div>
+    <p class="picker__meta" id="pickerMeta"></p>
+  </section>
+
+  <section class="facts">
+    <div class="fact">
+      <span class="fact__label">종전평가액</span>
+      <span class="fact__value" id="factPrev">0</span>
+      <span class="fact__sub" id="factPrevSub"></span>
+    </div>
+    <div class="fact">
+      <span class="fact__label">종후평가액</span>
+      <span class="fact__value" id="factAfter">0</span>
+      <span class="fact__sub" id="factAfterSub"></span>
+    </div>
+    <div class="fact">
+      <span class="fact__label">권리가액</span>
+      <span class="fact__value" id="factRight">0</span>
+      <span class="fact__sub" id="factRightSub"></span>
+    </div>
+    <div class="fact fact--key">
+      <span class="fact__label">분담금</span>
+      <span class="fact__value" id="factDue">0</span>
+      <span class="fact__sub" id="factDueSub"></span>
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="stack">
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">매수 시점</h2>
+        </div>
+        <div class="card__body">
+          <div class="choices">
+            <label class="choice">
+              <input type="radio" name="mode" value="ltv60" checked>
+              <span class="choice__text">
+                <div class="choice__title">2025.06.27 이전 매수</div>
+                <div class="choice__note">종전 감정평가액 기준</div>
+              </span>
+              <span class="choice__tag">LTV 60%</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="mode" value="consult">
+              <span class="choice__text">
+                <div class="choice__title">2025.06.28 ~ 10.14 매수</div>
+                <div class="choice__note">조합 별도 상담 필요</div>
+              </span>
+              <span class="choice__tag choice__tag--muted">상담</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="mode" value="ltv40">
+              <span class="choice__text">
+                <div class="choice__title">2025.10.15 이후 매수</div>
+                <div class="choice__note">종전 감정평가액 기준</div>
+              </span>
+              <span class="choice__tag">LTV 40%</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="mode" value="none">
+              <span class="choice__text">
+                <div class="choice__title">이주비 대출 미신청</div>
+                <div class="choice__note">기존 주택담보대출 잔액 차감</div>
+              </span>
+              <span class="choice__tag choice__tag--muted">주담대</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">대출 신청 금액</h2>
+        </div>
+        <div class="card__body">
+          <div class="loan">
+            <div class="loan__top">
+              <span class="loan__name">이주비 대출</span>
+              <span class="loan__rate" id="rateMove">연 4.50%</span>
+            </div>
+            <div class="loan__cap">한도 <b id="capMove">0</b></div>
+            <div class="amount">
+              <div class="amount__box">
+                <span class="amount__won">₩</span>
+                <input id="amtMove" type="text" inputmode="numeric" autocomplete="off" value="0">
+              </div>
+              <button type="button" class="amount__max" data-max="move">최대</button>
+            </div>
+            <div class="meter"><div class="meter__fill" id="meterMove"></div></div>
+            <div class="loan__foot">
+              <span>이자 <b id="moveFootInterest">0</b></span>
+              <span class="flag" id="moveFlag"></span>
+            </div>
+          </div>
+
+          <div class="loan">
+            <div class="loan__top">
+              <span class="loan__name">추가사업비 대출 <span class="loan__rate">(실수령 원금)</span></span>
+              <span class="loan__rate" id="rateAdd">연 5.28%</span>
+            </div>
+            <div class="loan__cap">한도 <b id="capAdd">0</b> · 이주비 신청액이 늘면 줄어듭니다</div>
+            <div class="amount">
+              <div class="amount__box">
+                <span class="amount__won">₩</span>
+                <input id="amtAdd" type="text" inputmode="numeric" autocomplete="off" value="0">
+              </div>
+              <button type="button" class="amount__max" data-max="add">최대</button>
+            </div>
+            <div class="meter"><div class="meter__fill" id="meterAdd"></div></div>
+            <div class="loan__foot">
+              <span>신청서 기재액(원금+이자) <b id="addFootApplied">0</b></span>
+              <span class="flag" id="addFlag"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <details class="card" id="settings">
+        <summary><span class="caret">▶</span>상세 설정<span class="summary__hint" id="settingsHint">5.28% · 55개월 · 단리</span></summary>
+        <div class="card__body">
+          <div class="settings">
+            <div class="setting">
+              <div class="setting__label">CD 91일물 (%)</div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setCd">2.92</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">이주비 금리 (%)</div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setMoveRate">4.50</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">대출 기간 (개월)</div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setMonths">55</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">종후자산 LTV (%)</div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setLtvAfter">90</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">이주비 LTV (%)</div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setLtvBefore">60</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">기존 주담대 잔액</div>
+              <div class="amount">
+                <div class="amount__box">
+                  <span class="amount__won">₩</span>
+                  <input id="setExisting" type="text" inputmode="numeric" autocomplete="off" value="0">
+                </div>
+              </div>
+            </div>
+            <div class="setting setting--wide">
+              <div class="setting__label">이자 계산 방식</div>
+              <div class="segmented">
+                <label><input type="radio" name="method" value="simple" checked>단리</label>
+                <label><input type="radio" name="method" value="quarter">3개월 복리</label>
+                <label><input type="radio" name="method" value="month">월복리</label>
+              </div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">십만원 단위 절사·올림</div>
+              <div class="segmented">
+                <label><input type="radio" name="rounding" value="on" checked>적용</label>
+                <label><input type="radio" name="rounding" value="off">미적용</label>
+              </div>
+            </div>
+          </div>
+          <div class="rate-breakdown" id="rateBreakdown"></div>
+          <button type="button" class="reset" id="resetBtn">기본값으로 되돌리기</button>
+        </div>
+      </details>
+
+    </div>
+
+    <aside class="stack results">
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">계산 결과</h2>
+        </div>
+        <div class="total">
+          <span class="total__label">만기 총 상환액</span>
+          <span class="total__value" id="totalValue">0</span>
+          <span class="total__kor" id="totalKor">0원</span>
+        </div>
+        <div class="lines">
+          <div class="line line--emph">
+            <span class="line__label">총 대출(실수령)</span>
+            <span class="line__value" id="lineTotalLoan">0</span>
+          </div>
+          <div class="line line--emph line--accent">
+            <span class="line__label">총 이자</span>
+            <span class="line__value" id="lineTotalInterest">0</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab" role="tab" id="tabLimit" aria-controls="panelLimit" aria-selected="true">한도</button>
+          <button type="button" class="tab" role="tab" id="tabInterest" aria-controls="panelInterest" aria-selected="false">이자</button>
+          <button type="button" class="tab" role="tab" id="tabRate" aria-controls="panelRate" aria-selected="false">금리 민감도</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panelLimit" aria-labelledby="tabLimit">
+          <div class="lines">
+            <div class="line">
+              <span class="line__label">이주비 대출 원금</span>
+              <span class="line__value" id="lineMovePrincipal">0</span>
+            </div>
+            <div class="line">
+              <span class="line__label">추가사업비 원금</span>
+              <span class="line__value" id="lineAddPrincipal">0</span>
+            </div>
+            <div class="line line--sub">
+              <span class="line__label">신청서 기재액(원금+이자)</span>
+              <span class="line__value" id="lineAddApplied">0</span>
+            </div>
+          </div>
+          <div class="tablegroup">
+            <h3 class="card__title">매수 시점별 한도</h3>
+            <div class="scroll-x">
+              <table>
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>이주비 한도</th>
+                    <th>잔여한도</th>
+                    <th>추가사업비 원금한도</th>
+                    <th>실수령 합계</th>
+                  </tr>
+                </thead>
+                <tbody id="table1Body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panelInterest" aria-labelledby="tabInterest" hidden>
+          <div class="lines">
+            <div class="line">
+              <span class="line__label">이주비 이자</span>
+              <span class="line__value" id="lineMoveInterest">0</span>
+            </div>
+            <div class="line">
+              <span class="line__label">추가사업비 이자</span>
+              <span class="line__value" id="lineAddInterest">0</span>
+            </div>
+            <div class="line line--warnish">
+              <span class="line__label">이자의 이자</span>
+              <span class="line__value" id="lineIoi">—</span>
+            </div>
+            <div class="line line--emph line--accent">
+              <span class="line__label">총 이자</span>
+              <span class="line__value" id="lineTotalInterest2">0</span>
+            </div>
+          </div>
+          <div class="tablegroup">
+            <h3 class="card__title">이자 계산 방식별</h3>
+            <div class="scroll-x">
+              <table>
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>이주비 이자</th>
+                    <th>추가사업비 이자</th>
+                    <th>이자의 이자</th>
+                    <th>총 이자</th>
+                  </tr>
+                </thead>
+                <tbody id="table2Body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panelRate" aria-labelledby="tabRate" hidden>
+          <div class="tablegroup">
+            <h3 class="card__title">추가사업비 금리 민감도</h3>
+            <div class="scroll-x">
+              <table>
+                <thead>
+                  <tr>
+                    <th>추가사업비 금리</th>
+                    <th>원금한도</th>
+                    <th>추가사업비 이자</th>
+                    <th>총 이자</th>
+                  </tr>
+                </thead>
+                <tbody id="table3Body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <strong>계산 근거</strong>
+    <ul>
+      <li>감정평가액·분담금: 2026년 정기총회 책자 303~319쪽 (612세대) — 사진 판독 후 산술 검증</li>
+      <li>한도 공식: 추가사업비 대여 신청 최종 신청서 — 추가사업비 한도 = 종후자산 LTV 90% − 분담금 − 이주비 대출 신청금액</li>
+      <li>이자: 조합 공식 계산시트 기준 원금 × 연이율 ÷ 12 × 개월수 (단리), 십만원 단위 절사·올림</li>
+      <li>금리와 이자 계산 방식은 조합 확정 전이라 상세 설정에서 바꿔 비교할 수 있습니다</li>
+      <li>이 페이지는 참고용 추정치이며 실제 대출 조건은 조합·금융기관 안내를 따릅니다</li>
+    </ul>
+  </footer>
+
+</div>
+
+<div class="bottombar">
+  <div class="bottombar__item bottombar__item--grow">
+    <span class="bottombar__label">총 이자</span>
+    <span class="bottombar__value" id="barInterest">0</span>
+  </div>
+  <div class="bottombar__item bottombar__item--grow">
+    <span class="bottombar__label">만기 총 상환액</span>
+    <span class="bottombar__value" id="barTotal">0</span>
+  </div>
+  <button type="button" class="bottombar__go" id="barGo">결과</button>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
