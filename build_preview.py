@@ -42,7 +42,7 @@ def extract_body(html):
     body = m.group(1)
     # remove the app.js script tag (it is inlined separately below)
     body = re.sub(
-        r'\s*<script[^>]*src=["\']app\.js["\'][^>]*>\s*</script>\s*',
+        r'\s*<script[^>]*src=["\']app\.js[^"\']*["\'][^>]*>\s*</script>\s*',
         '\n',
         body,
         flags=re.IGNORECASE,

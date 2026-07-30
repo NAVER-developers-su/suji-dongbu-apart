@@ -116,6 +116,10 @@ build_preview.py  전부 인라인한 단일 파일 preview.html 생성
 
 빌드 도구도, 프레임워크도, 외부 의존성도 없습니다. 그대로 GitHub Pages에 올라갑니다.
 
+`styles.css`나 `app.js`를 수정할 때는 `index.html`의 `?v=` 버전을 같이 올려주세요.
+GitHub Pages가 파일을 10분간 캐시하기 때문에, 버전을 안 올리면 배포 직후 새 HTML과
+옛 JS가 섞여 화면 일부가 비어 보일 수 있습니다.
+
 ## 로컬에서 보기
 
 `app.js`가 `분담금.json`을 `fetch`하기 때문에 파일을 직접 열면(`file://`) 동작하지 않습니다.

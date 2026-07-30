@@ -490,7 +490,8 @@ function renderTableMove(unit) {
       `<td>${won(r.totalInterest)}</td>` +
       `</tr>`;
   });
-  document.getElementById('tableMoveRate').innerHTML = html;
+  const tbMove = document.getElementById('tableMoveRate');
+  if (tbMove) tbMove.innerHTML = html; // 캐시 어긋남으로 요소가 없어도 죽지 않게
 }
 
 function buildRateSweep(base) {
@@ -534,7 +535,8 @@ function renderTable3(unit) {
       `<td>${won(r.totalInterest)}</td>` +
       `</tr>`;
   });
-  document.getElementById('table3Body').innerHTML = html0 + html;
+  const tb3 = document.getElementById('table3Body');
+  if (tb3) tb3.innerHTML = html0 + html;
 }
 
 /* ── 한도 강제 제한 ──────────────────────────── */
