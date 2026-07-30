@@ -464,8 +464,8 @@ function updateResults(r) {
 
 function updateSettingsPanel(r) {
   document.getElementById('settingsHint').textContent = (state.addBasis === 'notice')
-    ? `${r.addRatePct.toFixed(2)}% · 조합 발표치`
-    : `${r.addRatePct.toFixed(2)}% · ${state.months}개월 · 조합 시트`;
+    ? '조합 발표치'
+    : '조합 시트 (단리)';
 
   document.getElementById('rateBreakdown').innerHTML =
     `추가사업비 금리 = CD ${state.cd.toFixed(2)}% + 가산 ${GASAN.toFixed(2)}% + ` +
