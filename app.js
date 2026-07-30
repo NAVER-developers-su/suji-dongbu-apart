@@ -40,11 +40,11 @@ const DEFAULTS = {
   ltvAfter: 90,
   ltvBefore: 60,
   existing: 0,
-  method: 'simple',
+  method: 'month',
   rounding: 'on',
 };
 
-const METHOD_LABEL = { simple: '단리', quarter: '3개월 복리', month: '월복리' };
+const METHOD_LABEL = { simple: '단리', month: '월복리' };
 
 const STEPPER_CONFIG = {
   setCd: { step: 0.1, min: 0, max: 20, decimals: 2, key: 'cd' },
@@ -83,7 +83,6 @@ function parseAmount(str) {
 /* ── 계산 로직 ───────────────────────────────── */
 
 function factor(r, method, n) {
-  if (method === 'quarter') return Math.pow(1 + r / 4, n / 3) - 1;
   if (method === 'month') return Math.pow(1 + r / 12, n) - 1;
   return r / 12 * n; // simple
 }
@@ -240,6 +239,8 @@ function flagState(amount, cap, wasClamped) {
   return undefined;
 }
 
+const moveChipEls = document.querySelectorAll('.chip[data-add="move"], .chip[data-clear="move"]');
+
 function updateLoans(unit, r, clamped) {
   const amtMoveEl = document.getElementById('amtMove');
 
@@ -249,6 +250,7 @@ function updateLoans(unit, r, clamped) {
   // 이주비
   const moveDisabled = state.mode === 'none';
   amtMoveEl.disabled = moveDisabled;
+  moveChipEls.forEach(chip => { chip.disabled = moveDisabled; });
   if (moveDisabled) {
     document.getElementById('capMove').textContent = '—';
   } else if (state.mode === 'consult') {
@@ -344,7 +346,6 @@ function renderTable1(unit) {
 function renderTable2(unit) {
   const methods = [
     { key: 'simple', label: '단리' },
-    { key: 'quarter', label: '3개월 복리' },
     { key: 'month', label: '월복리' },
   ];
   let html = '';
@@ -483,42 +484,6 @@ function render() {
   renderTable3(unit);
 }
 
-/* ── 탭 ──────────────────────────────────────── */
-
-function bindTabs() {
-  const tabs = Array.from(document.querySelectorAll('.tab'));
-  if (!tabs.length) return;
-
-  function selectTab(tab, focus) {
-    tabs.forEach(t => {
-      const isSelected = t === tab;
-      t.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-      t.setAttribute('tabindex', isSelected ? '0' : '-1');
-      const panel = document.getElementById(t.getAttribute('aria-controls'));
-      if (panel) {
-        if (isSelected) panel.removeAttribute('hidden');
-        else panel.setAttribute('hidden', '');
-      }
-    });
-    if (focus) tab.focus();
-  }
-
-  tabs.forEach((tab, i) => {
-    tab.addEventListener('click', () => selectTab(tab, false));
-    tab.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const dir = e.key === 'ArrowRight' ? 1 : -1;
-        const next = tabs[(i + dir + tabs.length) % tabs.length];
-        selectTab(next, true);
-      }
-    });
-  });
-
-  const initial = tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0];
-  selectTab(initial, false);
-}
-
 /* ── 이벤트 바인딩 ───────────────────────────── */
 
 function bindAmountInput(el, key) {
@@ -532,8 +497,26 @@ function bindAmountInput(el, key) {
   });
 }
 
+function bindChips() {
+  document.querySelectorAll('.chip[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.add === 'move' ? 'amtMove' : 'amtAdd';
+      state[key] = state[key] + Number(btn.dataset.amount);
+      render();
+    });
+  });
+
+  document.querySelectorAll('.chip[data-clear]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.clear === 'move' ? 'amtMove' : 'amtAdd';
+      state[key] = 0;
+      render();
+    });
+  });
+}
+
 function bindEvents() {
-  bindTabs();
+  bindChips();
 
   document.getElementById('selDong').addEventListener('change', render);
   document.getElementById('selFloor').addEventListener('change', render);

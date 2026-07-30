@@ -85,7 +85,7 @@
                 <div class="choice__title">2025.06.28 ~ 10.14 매수</div>
                 <div class="choice__note">조합 별도 상담 필요</div>
               </span>
-              <span class="choice__tag choice__tag--muted">상담</span>
+              <span class="choice__tag choice__tag--muted">상담 필요</span>
             </label>
             <label class="choice">
               <input type="radio" name="mode" value="ltv40">
@@ -103,53 +103,6 @@
               </span>
               <span class="choice__tag choice__tag--muted">주담대</span>
             </label>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card__head">
-          <h2 class="card__title">대출 신청 금액</h2>
-        </div>
-        <div class="card__body">
-          <div class="loan">
-            <div class="loan__top">
-              <span class="loan__name">이주비 대출</span>
-              <span class="loan__rate" id="rateMove">연 4.50%</span>
-            </div>
-            <div class="loan__cap">한도 <b id="capMove">0</b></div>
-            <div class="amount">
-              <div class="amount__box">
-                <span class="amount__won">₩</span>
-                <input id="amtMove" type="text" inputmode="numeric" autocomplete="off" value="0">
-              </div>
-              <button type="button" class="amount__max" data-max="move">최대</button>
-            </div>
-            <div class="meter"><div class="meter__fill" id="meterMove"></div></div>
-            <div class="loan__foot">
-              <span>이자 <b id="moveFootInterest">0</b></span>
-              <span class="flag" id="moveFlag"></span>
-            </div>
-          </div>
-
-          <div class="loan">
-            <div class="loan__top">
-              <span class="loan__name">추가사업비 대출 <span class="loan__rate">(실수령 원금)</span></span>
-              <span class="loan__rate" id="rateAdd">연 5.28%</span>
-            </div>
-            <div class="loan__cap">한도 <b id="capAdd">0</b> · 이주비 신청액이 늘면 줄어듭니다</div>
-            <div class="amount">
-              <div class="amount__box">
-                <span class="amount__won">₩</span>
-                <input id="amtAdd" type="text" inputmode="numeric" autocomplete="off" value="0">
-              </div>
-              <button type="button" class="amount__max" data-max="add">최대</button>
-            </div>
-            <div class="meter"><div class="meter__fill" id="meterAdd"></div></div>
-            <div class="loan__foot">
-              <span>신청서 기재액(원금+이자) <b id="addFootApplied">0</b></span>
-              <span class="flag" id="addFlag"></span>
-            </div>
           </div>
         </div>
       </section>
@@ -210,9 +163,8 @@
             <div class="setting setting--wide">
               <div class="setting__label">이자 계산 방식</div>
               <div class="segmented">
-                <label><input type="radio" name="method" value="simple" checked>단리</label>
-                <label><input type="radio" name="method" value="quarter">3개월 복리</label>
-                <label><input type="radio" name="method" value="month">월복리</label>
+                <label><input type="radio" name="method" value="simple">단리</label>
+                <label><input type="radio" name="method" value="month" checked>월복리</label>
               </div>
             </div>
             <div class="setting">
@@ -227,6 +179,65 @@
           <button type="button" class="reset" id="resetBtn">기본값으로 되돌리기</button>
         </div>
       </details>
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">대출 신청 금액</h2>
+        </div>
+        <div class="card__body">
+          <div class="loan">
+            <div class="loan__top">
+              <span class="loan__name">이주비 대출</span>
+              <span class="loan__rate" id="rateMove">연 4.50%</span>
+            </div>
+            <div class="loan__cap">한도 <b id="capMove">0</b></div>
+            <div class="amount">
+              <div class="amount__box">
+                <span class="amount__won">₩</span>
+                <input id="amtMove" type="text" inputmode="numeric" autocomplete="off" value="0">
+              </div>
+              <button type="button" class="amount__max" data-max="move">최대</button>
+            </div>
+            <div class="chips">
+              <button type="button" class="chip" data-add="move" data-amount="1000000">+100만</button>
+              <button type="button" class="chip" data-add="move" data-amount="10000000">+1000만</button>
+              <button type="button" class="chip" data-add="move" data-amount="100000000">+1억</button>
+              <button type="button" class="chip chip--clear" data-clear="move">지움</button>
+            </div>
+            <div class="meter"><div class="meter__fill" id="meterMove"></div></div>
+            <div class="loan__foot">
+              <span>이자 <b id="moveFootInterest">0</b></span>
+              <span class="flag" id="moveFlag"></span>
+            </div>
+          </div>
+
+          <div class="loan">
+            <div class="loan__top">
+              <span class="loan__name">추가사업비 대출 <span class="loan__rate">(실수령 원금)</span></span>
+              <span class="loan__rate" id="rateAdd">연 5.28%</span>
+            </div>
+            <div class="loan__cap">한도 <b id="capAdd">0</b> · 이주비 신청액이 늘면 줄어듭니다</div>
+            <div class="amount">
+              <div class="amount__box">
+                <span class="amount__won">₩</span>
+                <input id="amtAdd" type="text" inputmode="numeric" autocomplete="off" value="0">
+              </div>
+              <button type="button" class="amount__max" data-max="add">최대</button>
+            </div>
+            <div class="chips">
+              <button type="button" class="chip" data-add="add" data-amount="1000000">+100만</button>
+              <button type="button" class="chip" data-add="add" data-amount="10000000">+1000만</button>
+              <button type="button" class="chip" data-add="add" data-amount="100000000">+1억</button>
+              <button type="button" class="chip chip--clear" data-clear="add">지움</button>
+            </div>
+            <div class="meter"><div class="meter__fill" id="meterAdd"></div></div>
+            <div class="loan__foot">
+              <span>신청서 기재액(원금+이자) <b id="addFootApplied">0</b></span>
+              <span class="flag" id="addFlag"></span>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </div>
 
@@ -254,12 +265,10 @@
       </section>
 
       <section class="card">
-        <div class="tabs" role="tablist">
-          <button type="button" class="tab" role="tab" id="tabLimit" aria-controls="panelLimit" aria-selected="true">한도</button>
-          <button type="button" class="tab" role="tab" id="tabInterest" aria-controls="panelInterest" aria-selected="false">이자</button>
-          <button type="button" class="tab" role="tab" id="tabRate" aria-controls="panelRate" aria-selected="false">금리 민감도</button>
+        <div class="card__head">
+          <h2 class="card__title">한도</h2>
         </div>
-        <div class="tabpanel" role="tabpanel" id="panelLimit" aria-labelledby="tabLimit">
+        <div class="card__body">
           <div class="lines">
             <div class="line">
               <span class="line__label">이주비 대출 원금</span>
@@ -292,7 +301,13 @@
             </div>
           </div>
         </div>
-        <div class="tabpanel" role="tabpanel" id="panelInterest" aria-labelledby="tabInterest" hidden>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">이자</h2>
+        </div>
+        <div class="card__body">
           <div class="lines">
             <div class="line">
               <span class="line__label">이주비 이자</span>
@@ -329,7 +344,13 @@
             </div>
           </div>
         </div>
-        <div class="tabpanel" role="tabpanel" id="panelRate" aria-labelledby="tabRate" hidden>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">금리 민감도</h2>
+        </div>
+        <div class="card__body">
           <div class="tablegroup">
             <h3 class="card__title">추가사업비 금리 민감도</h3>
             <div class="scroll-x">
