@@ -443,6 +443,19 @@ details[open] > summary .caret { transform: rotate(90deg); }
 details[open] > summary { border-bottom: 1px solid var(--line); }
 
 .settings { display: grid; grid-template-columns: minmax(0, 1fr); gap: 13px; }
+
+.setgroup {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  color: var(--accent-ink);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 5px;
+  margin-top: 4px;
+}
+
+.setgroup:first-child { margin-top: 0; }
 .setting { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .setting--wide { grid-column: 1 / -1; }
 

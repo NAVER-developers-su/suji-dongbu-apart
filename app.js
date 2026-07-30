@@ -47,7 +47,7 @@ const DEFAULTS = {
   existing: 0,
   addBasis: 'notice',
   moveIoi: 'none',
-  rounding: 'on',
+  rounding: 'off',
 };
 
 const HELP = {
@@ -141,7 +141,8 @@ const HELP = {
   rounding: {
     title: '십만원 단위 절사·올림',
     body:
-      '<p>조합 공식 계산시트는 한도를 십만원 아래로 <b>버리고</b>, 이자는 십만원 위로 <b>올립니다</b>. 시트와 숫자를 정확히 맞추려면 켜두세요. 끄면 원 단위로 계산합니다.</p>',
+      '<p>조합 공식 계산시트의 자릿수 처리 방식입니다. 시트는 한도를 십만원 아래로 <b>버리고</b>(ROUNDDOWN), 이자는 십만원 위로 <b>올립니다</b>(ROUNDUP).</p>' +
+      '<p>기본값은 <b>미적용(원 단위)</b>입니다 — 계산 결과를 그대로 보여줍니다. 조합 시트나 안내문의 숫자와 자릿수까지 정확히 맞춰보고 싶을 때만 켜세요.</p>',
   },
   ltv: {
     title: 'LTV',

@@ -111,14 +111,7 @@
         <summary><span class="caret">▶</span>상세 설정<span class="summary__hint" id="settingsHint">5.28% · 55개월 · 조합 발표치</span></summary>
         <div class="card__body">
           <div class="settings">
-            <div class="setting">
-              <div class="setting__label">CD 91일물 (%)<button type="button" class="help" data-help="cd" aria-label="설명 보기">i</button></div>
-              <div class="stepper">
-                <button type="button" data-step="-1">−</button>
-                <span class="stepper__val" id="setCd">2.92</span>
-                <button type="button" data-step="1">+</button>
-              </div>
-            </div>
+            <div class="setgroup">이주비 대출</div>
             <div class="setting">
               <div class="setting__label">이주비 금리 (%)</div>
               <div class="stepper">
@@ -126,6 +119,7 @@
                 <span class="stepper__val" id="setMoveRate">4.50</span>
                 <button type="button" data-step="1">+</button>
               </div>
+              <div class="setting__note">Cofix(6개월물) + 가산 1.60% · 실행일에 확정</div>
             </div>
             <div class="setting">
               <div class="setting__label">이주비 기간 (개월)<button type="button" class="help" data-help="gigan" aria-label="설명 보기">i</button></div>
@@ -137,6 +131,33 @@
               <div class="setting__note">신한은행 제안은 60개월 이내입니다</div>
             </div>
             <div class="setting">
+              <div class="setting__label">이주비 LTV (%)</div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setLtvBefore">60</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+              <div class="setting__note">매수 시점 선택에 따라 자동으로 바뀝니다</div>
+            </div>
+            <div class="setting setting--wide">
+              <div class="setting__label">이주비 이자의 이자<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></div>
+              <div class="segmented">
+                <label><input type="radio" name="moveIoi" value="none" checked>없음</label>
+                <label><input type="radio" name="moveIoi" value="proxy">조합 대납</label>
+              </div>
+              <div class="setting__note">조합이 공표한 값이 없어 기본값은 없음입니다. 안내문상 조합이 사업비 대출로 이자를 대납하는 구조라, 그 비용을 가늠하려면 조합 대납을 선택하세요.</div>
+            </div>
+
+            <div class="setgroup">추가사업비 대출</div>
+            <div class="setting">
+              <div class="setting__label">CD 91일물 (%)<button type="button" class="help" data-help="cd" aria-label="설명 보기">i</button></div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setCd">2.92</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+            </div>
+            <div class="setting">
               <div class="setting__label">추가사업비 기간 (개월)</div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
@@ -144,19 +165,21 @@
                 <button type="button" data-step="1">+</button>
               </div>
             </div>
+            <div class="setting setting--wide">
+              <div class="setting__label">추가사업비 이자 기준<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
+              <div class="segmented">
+                <label><input type="radio" name="addBasis" value="sheet">조합 시트 (단리)</label>
+                <label><input type="radio" name="addBasis" value="notice" checked>조합 발표치</label>
+              </div>
+              <div class="setting__note">조합 발표치는 2026.07.30 안내문 기준 1억당 이자 26,720,000원 · 이자의 이자 570,000원입니다.</div>
+            </div>
+
+            <div class="setgroup">공통</div>
             <div class="setting">
               <div class="setting__label">종후자산 LTV (%)<button type="button" class="help" data-help="ltv" aria-label="설명 보기">i</button></div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
                 <span class="stepper__val" id="setLtvAfter">90</span>
-                <button type="button" data-step="1">+</button>
-              </div>
-            </div>
-            <div class="setting">
-              <div class="setting__label">이주비 LTV (%)</div>
-              <div class="stepper">
-                <button type="button" data-step="-1">−</button>
-                <span class="stepper__val" id="setLtvBefore">60</span>
                 <button type="button" data-step="1">+</button>
               </div>
             </div>
@@ -168,29 +191,15 @@
                   <input id="setExisting" type="text" inputmode="numeric" autocomplete="off" value="0">
                 </div>
               </div>
-            </div>
-            <div class="setting setting--wide">
-              <div class="setting__label">추가사업비 이자 기준<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
-              <div class="segmented">
-                <label><input type="radio" name="addBasis" value="sheet">조합 시트 (단리)</label>
-                <label><input type="radio" name="addBasis" value="notice" checked>조합 발표치</label>
-              </div>
-              <div class="setting__note">조합 발표치는 2026.07.30 안내문 기준 1억당 이자 26,720,000원 · 이자의 이자 570,000원입니다.</div>
-            </div>
-            <div class="setting setting--wide">
-              <div class="setting__label">이주비 이자의 이자<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></div>
-              <div class="segmented">
-                <label><input type="radio" name="moveIoi" value="none" checked>없음</label>
-                <label><input type="radio" name="moveIoi" value="proxy">조합 대납</label>
-              </div>
-              <div class="setting__note">조합이 공표한 값이 없어 기본값은 없음입니다. 안내문상 조합이 사업비 대출로 이자를 대납하는 구조라, 그 비용을 가늠하려면 조합 대납을 선택하세요.</div>
+              <div class="setting__note">이주비 미신청일 때만 한도에서 차감됩니다</div>
             </div>
             <div class="setting">
               <div class="setting__label">십만원 단위 절사·올림<button type="button" class="help" data-help="rounding" aria-label="설명 보기">i</button></div>
               <div class="segmented">
-                <label><input type="radio" name="rounding" value="on" checked>적용</label>
-                <label><input type="radio" name="rounding" value="off">미적용</label>
+                <label><input type="radio" name="rounding" value="on">적용</label>
+                <label><input type="radio" name="rounding" value="off" checked>미적용</label>
               </div>
+              <div class="setting__note">조합 시트의 자릿수 처리입니다. 켜면 시트 숫자와 정확히 일치합니다.</div>
             </div>
           </div>
           <div class="rate-breakdown" id="rateBreakdown"></div>
