@@ -140,13 +140,13 @@
               <div class="setting__note">매수 시점 선택에 따라 자동으로 바뀝니다</div>
             </div>
             <div class="setting setting--wide">
-              <div class="setting__label">이주비 이자의 이자<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></div>
+              <div class="setting__label">이주비 이자 계산<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></div>
               <div class="segmented">
-                <label><input type="radio" name="moveIoi" value="none">없음</label>
+                <label><input type="radio" name="moveIoi" value="none">단리</label>
                 <label><input type="radio" name="moveIoi" value="monthly" checked>월복리</label>
                 <label><input type="radio" name="moveIoi" value="proxy">조합 대납</label>
               </div>
-              <div class="setting__note">추가사업비 발표치가 월복리 계산과 일치해 이주비도 월복리를 기본값으로 둡니다. 조합 공표값이 나오면 갱신합니다.</div>
+              <div class="setting__note">단리는 이자의 이자를 계산하지 않습니다. 추가사업비 발표치가 월복리 계산과 일치해 이주비도 월복리를 기본값으로 둡니다.</div>
             </div>
 
             <div class="setgroup">추가사업비 대출</div>
@@ -167,7 +167,7 @@
               </div>
             </div>
             <div class="setting setting--wide">
-              <div class="setting__label">추가사업비 이자 기준<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
+              <div class="setting__label">추가사업비 이자 계산<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
               <div class="segmented">
                 <label><input type="radio" name="addBasis" value="sheet">조합 시트 (단리)</label>
                 <label><input type="radio" name="addBasis" value="notice" checked>조합 발표치</label>
@@ -485,8 +485,8 @@
         재구성됩니다.</p>
         <p><b>이주비 이자의 이자</b> — 조합 공표값은 아직 없습니다(신한은행 이자 계산서
         대기 중). 발표치가 월복리 계산과 일치하므로 이주비도 <b>미납이자에 월복리가 붙는
-        것을 기본값</b>으로 두었습니다. 상세 설정에서 "없음"이나 "조합 대납"(안내문의 대납
-        구조 추정)으로 바꿀 수 있습니다.</p>
+        것을 기본값</b>으로 두었습니다. 상세 설정에서 "단리"(이자의 이자 없음)나 "조합 대납"(안내문의
+        대납 구조 추정)으로 바꿀 수 있습니다.</p>
         <code>월복리      = 원금 × [(1+금리÷12)ⁿ − 1 − 금리÷12×n]
 조합 대납 = 원금 × (이주비금리÷12) × (사업비금리÷12) × n(n−1)÷2</code>
         <p class="ref__src">출처: 조합 공식 계산시트 (260727) · 추가사업비/이주비 대출 관련
@@ -505,7 +505,7 @@
           확정되어 잔금에 합산</li>
           <li><b>대출 기간</b> — 개인별 이주·입주 시점에 따라 실제 기간은 짧아질 수 있음</li>
         </ul>
-        <p>이 때문에 금리·기간·이자 기준을 상세 설정에서 전부 바꿔볼 수 있게 만들었습니다.
+        <p>이 때문에 금리·기간·이자 계산 방식을 상세 설정에서 전부 바꿔볼 수 있게 만들었습니다.
         조합 확정값이 나오면 기본값을 갱신합니다.</p>
       </div>
     </details>
