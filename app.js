@@ -46,7 +46,7 @@ const DEFAULTS = {
   ltvBefore: 60,
   existing: 0,
   addBasis: 'notice',
-  moveIoi: 'none',
+  moveIoi: 'monthly',
   rounding: 'off',
 };
 
@@ -152,13 +152,14 @@ const HELP = {
   ioni: {
     title: '이자의 이자',
     body:
-      '<p>만기까지 이자를 한 푼도 내지 않기 때문에, <b>그 사이 쌓인 이자에 다시 붙는 이자</b>입니다. 두 대출은 근거가 다릅니다.</p>' +
-      '<p><b>추가사업비</b> — 조합이 2026.07.30 안내문에서 <b>1억당 이자의 이자 약 570,000원</b>이라고 공표했습니다. 기본값(조합 발표치)이 이 비율을 그대로 적용합니다. 조합 시트(단리)를 고르면 0이 됩니다.</p>' +
-      '<p><b>이주비</b> — 이주비 이자는 은행 조건상 매월 후취라, 조합이 사업비 대출을 받아 대납하고 조합원은 입주 때 정산합니다. 다만 대납금에 붙는 이자를 개인에게 청구할지는 <b>조합이 공표한 바 없어 기본값은 "없음"</b>입니다. 조합도 신한은행 이자 계산서를 기다리는 중입니다.</p>' +
-      '<code>조합 대납 추정 = 이주비원금 × (이주비금리÷12) × (사업비금리÷12) × n(n−1)÷2</code>' +
-      '<p>매달 대납된 이자가 만기까지 남은 개월 수만큼 이자를 낳아 n(n−1)÷2 항이 나옵니다.</p>' +
-      '<div class="helpsheet__note">참고: 원금에 이자가 합쳐지는 복리와 달리, 별도 대출(사업비 대출)에서 생기는 비용입니다.</div>',
-  },  mingam: {
+      '<p>만기까지 이자를 한 푼도 내지 않기 때문에, <b>그 사이 쌓인 이자에 다시 붙는 이자</b>입니다.</p>' +
+      '<p><b>추가사업비</b> — 조합이 2026.07.30 안내문에서 <b>1억당 이자의 이자 약 570,000원</b>이라고 공표했습니다. 기본값(조합 발표치)이 이 비율을 그대로 적용합니다. 이 발표치는 5.28% 월복리 55개월 총이자와 0.1% 이내로 일치합니다 — 실제 계산은 월복리로 이루어진 것으로 보입니다.</p>' +
+      '<p><b>이주비</b> — 조합 공표값은 아직 없습니다(신한은행 이자 계산서 대기 중). 발표치가 월복리 계산과 일치하므로 이주비도 <b>미납이자에 이주비 금리로 월복리가 붙는 것(월복리)을 기본값</b>으로 둡니다.</p>' +
+      '<code>월복리 = 원금 × [(1+금리÷12)ⁿ − 1 − 금리÷12×n]</code>' +
+      '<p>다른 선택지: <b>없음</b>(이자의 이자를 계산하지 않음), <b>조합 대납</b>(안내문의 대납 구조 — 조합이 사업비 대출로 이자를 대납하고 대납금에 사업비 금리가 붙는 추정).</p>' +
+      '<div class="helpsheet__note">참고: 은행 이자 계산서가 나오면 기본값을 확정값으로 바꿉니다.</div>',
+  },
+  mingam: {
     title: '금리 민감도',
     body:
       '<p>추가사업비 금리가 오르면 총 이자가 얼마나 늘고 빌릴 수 있는 원금이 얼마나 줄어드는지 보여줍니다.</p>' +
@@ -217,7 +218,7 @@ function computeAll(unit, s) {
   const moveFactor = rMove / 12 * nMove;
 
   const totalCap = unit.종후평균 * s.ltvAfter / 100;
-  const moveCap = (s.mode === 'none') ? 0 : (unit.종전평균 * s.ltvBefore / 100);
+  const moveCap = (s.mode === 'none') ? 0 : Math.floor(unit.종전평균 * s.ltvBefore / 100);
 
   const moveAmount = (s.mode === 'none') ? 0 : s.amtMove;
   const deduct = (s.mode === 'none') ? s.existing : moveAmount;
@@ -227,19 +228,25 @@ function computeAll(unit, s) {
   let addPrincipalCap = bucket / (1 + addFactor);
   addPrincipalCap = (s.rounding === 'on')
     ? Math.floor(addPrincipalCap / 100000) * 100000
-    : addPrincipalCap;
+    : Math.floor(addPrincipalCap); // 한도는 항상 정수 — 최대 버튼·클램프·배지가 같은 값을 보게 한다
   const addCapInterest = bucket - addPrincipalCap;
 
   const addPrincipal = s.amtAdd;
 
   const moveInterest = Math.round(moveAmount * moveFactor);
 
-  // 이주비 이자의 이자: 이주비 이자는 은행 조건상 매월 후취라, 조합이 사업비
-  // 대출을 받아 대납하고 그 대납금에 사업비 금리가 붙는다. k개월차 대납금은
-  // 만기까지 (n−k)개월간 이자가 발생하므로 합이 n(n−1)/2 항이 된다.
-  const moveIoi = (s.moveIoi === 'proxy')
-    ? Math.round(moveAmount * (rMove / 12) * (rAdd / 12) * nMove * (nMove - 1) / 2)
-    : 0;
+  // 이주비 이자의 이자.
+  // monthly: 미납이자에 이주비 금리로 월복리가 붙는다고 본다 — 조합 발표치(추가
+  //          사업비 1억당 2,672만+57만)가 월복리 계산과 일치해 기본값으로 둔다.
+  // proxy:   조합이 사업비 대출로 이자를 대납하고 대납금에 사업비 금리가 붙는
+  //          구조(2026.07.30 안내문). k개월차 대납금이 만기까지 (n−k)개월 이자를
+  //          낳아 n(n−1)/2 항이 된다.
+  const moveIoi =
+    (s.moveIoi === 'monthly')
+      ? Math.round(moveAmount * (Math.pow(1 + rMove / 12, nMove) - 1 - moveFactor))
+      : (s.moveIoi === 'proxy')
+        ? Math.round(moveAmount * (rMove / 12) * (rAdd / 12) * nMove * (nMove - 1) / 2)
+        : 0;
 
   let addInterest = addPrincipal * addFactor;
   addInterest = (s.rounding === 'on')
@@ -455,9 +462,9 @@ function updateResults(r) {
 }
 
 function updateSettingsPanel(r) {
-  const basisLabel = (state.addBasis === 'notice') ? '조합 발표치' : '조합 시트';
-  document.getElementById('settingsHint').textContent =
-    `${r.addRatePct.toFixed(2)}% · ${state.months}개월 · ${basisLabel}`;
+  document.getElementById('settingsHint').textContent = (state.addBasis === 'notice')
+    ? `${r.addRatePct.toFixed(2)}% · 조합 발표치`
+    : `${r.addRatePct.toFixed(2)}% · ${state.months}개월 · 조합 시트`;
 
   document.getElementById('rateBreakdown').innerHTML =
     `추가사업비 금리 = CD ${state.cd.toFixed(2)}% + 가산 ${GASAN.toFixed(2)}% + ` +
@@ -728,11 +735,11 @@ function bindEvents() {
       if (!unit) return;
       const r = computeAll(unit, state);
       if (btn.dataset.max === 'move') {
-        if (state.mode === 'none') return;
-        state.amtMove = Math.round(r.moveCap);
+        if (state.mode === 'none' || state.mode === 'consult') return; // 한도 미정
+        state.amtMove = Math.floor(r.moveCap);
         document.getElementById('amtMove').value = won(state.amtMove);
       } else if (btn.dataset.max === 'add') {
-        state.amtAdd = Math.round(r.addPrincipalCap);
+        state.amtAdd = Math.floor(r.addPrincipalCap);
         document.getElementById('amtAdd').value = won(state.amtAdd);
       }
       render();
@@ -782,7 +789,8 @@ function bindEvents() {
     state.months = DEFAULTS.months;
     state.monthsMove = DEFAULTS.monthsMove;
     state.ltvAfter = DEFAULTS.ltvAfter;
-    state.ltvBefore = DEFAULTS.ltvBefore;
+    // 이주비 LTV는 현재 선택된 매수 시점과 어긋나지 않게 재유도한다.
+    state.ltvBefore = (state.mode === 'ltv40') ? 40 : DEFAULTS.ltvBefore;
     state.existing = DEFAULTS.existing;
     state.addBasis = DEFAULTS.addBasis;
     state.moveIoi = DEFAULTS.moveIoi;
@@ -793,7 +801,7 @@ function bindEvents() {
     document.getElementById('setMonths').textContent = String(DEFAULTS.months);
     document.getElementById('setMonthsMove').textContent = String(DEFAULTS.monthsMove);
     document.getElementById('setLtvAfter').textContent = String(DEFAULTS.ltvAfter);
-    document.getElementById('setLtvBefore').textContent = String(DEFAULTS.ltvBefore);
+    document.getElementById('setLtvBefore').textContent = String(state.ltvBefore);
     document.getElementById('setExisting').value = won(DEFAULTS.existing);
     document.querySelector('input[name="addBasis"][value="' + DEFAULTS.addBasis + '"]').checked = true;
     document.querySelector('input[name="moveIoi"][value="' + DEFAULTS.moveIoi + '"]').checked = true;
@@ -813,8 +821,8 @@ function bindEvents() {
 function prefillMaxAmounts() {
   const unit = currentUnit();
   if (!unit) return;
-  state.amtMove = Math.round(computeAll(unit, state).moveCap);
-  state.amtAdd = Math.round(computeAll(unit, state).addPrincipalCap);
+  state.amtMove = Math.floor(computeAll(unit, state).moveCap);
+  state.amtAdd = Math.floor(computeAll(unit, state).addPrincipalCap);
   document.getElementById('amtMove').value = won(state.amtMove);
   document.getElementById('amtAdd').value = won(state.amtAdd);
 }
