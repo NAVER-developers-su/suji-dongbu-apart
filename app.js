@@ -163,7 +163,8 @@ const HELP = {
     title: '금리 민감도',
     body:
       '<p>추가사업비 금리가 오르면 총 이자가 얼마나 늘고 빌릴 수 있는 원금이 얼마나 줄어드는지 보여줍니다.</p>' +
-      '<p>금리가 오르면 이자계수가 커져서 같은 한도 안에 담을 수 있는 원금이 줄어듭니다. 즉 <b>이자는 늘고 손에 쥐는 돈은 줄어듭니다.</b></p>',
+      '<p>금리가 오르면 이자계수가 커져서 같은 한도 안에 담을 수 있는 원금이 줄어듭니다. 즉 <b>이자는 늘고 손에 쥐는 돈은 줄어듭니다.</b></p>' +
+      '<div class="helpsheet__note">참고: 조합 발표치는 금리와 무관한 고정 비율(1억당 2,672만)이라, 이 표는 조합 시트(단리) 기준으로 계산합니다.</div>',
   },
 };
 
@@ -445,7 +446,7 @@ function updateResults(r) {
 
   // 추가사업비 대출 블록
   document.getElementById('headAddRate').textContent = (state.addBasis === 'notice')
-    ? `조합 발표치 ${(NOTICE_ADD_INTEREST_RATE * 100).toFixed(2)}%`
+    ? '조합 발표치 · 1억당 이자 2,672만'
     : `연 ${r.addRatePct.toFixed(2)}% · ${state.months}개월`;
   document.getElementById('lineAddPrincipal2').textContent = won(r.addPrincipal);
   document.getElementById('lineAddInterest').textContent = won(r.addInterest);
@@ -473,38 +474,6 @@ function updateSettingsPanel(r) {
 }
 
 /* ── 경우별 비교 표 ──────────────────────────── */
-
-function scenarioMoveMode(unit, modeKey) {
-  const s2 = Object.assign({}, state, { mode: modeKey });
-  if (modeKey === 'ltv60') s2.ltvBefore = 60;
-  if (modeKey === 'ltv40') s2.ltvBefore = 40;
-  const moveCapPre = (modeKey === 'none') ? 0 : (unit.종전평균 * s2.ltvBefore / 100);
-  s2.amtMove = moveCapPre;
-  return computeAll(unit, s2);
-}
-
-function renderTable1(unit) {
-  const rows = [
-    { key: 'ltv60', label: 'LTV 60%' },
-    { key: 'ltv40', label: 'LTV 40%' },
-    { key: 'none', label: '이주비 미신청' },
-  ];
-  let html = '';
-  rows.forEach(row => {
-    const r = scenarioMoveMode(unit, row.key);
-    const isCurrent = state.mode === row.key;
-    const total = r.moveAmount + r.addPrincipalCap;
-    html += `<tr${isCurrent ? ' data-current="1"' : ''}>` +
-      `<th>${row.label}${isCurrent ? '<span class="pill">현재</span>' : ''}</th>` +
-      `<td>${row.key === 'none' ? '—' : won(r.moveCap)}</td>` +
-      `<td>${won(r.bucket)}</td>` +
-      `<td>${won(r.addPrincipalCap)}</td>` +
-      `<td>${won(total)}</td>` +
-      `</tr>`;
-  });
-  html += `<tr class="note-row"><td colspan="5">2025.06.28~10.14 매수는 조합 별도 상담이 필요합니다.</td></tr>`;
-  document.getElementById('table1Body').innerHTML = html;
-}
 
 function renderTable2(unit) {
   const bases = [
@@ -553,8 +522,13 @@ function renderTable3(unit) {
   const base = Math.round((state.cd + GASAN + FEE) * 100) / 100;
   const rates = buildRateSweep(base);
   let html = '';
+  let html0 = '';
+  if (state.addBasis === 'notice') {
+    html0 = `<tr class="note-row"><td colspan="4">조합 발표치는 금리와 무관한 고정 비율이라, 이 표는 조합 시트(단리) 기준으로 금리 영향을 보여줍니다.</td></tr>`;
+  }
   rates.forEach(rate => {
-    const s2 = Object.assign({}, state, { cd: rate - GASAN - FEE });
+    // 발표치는 금리를 반영하지 않으므로 민감도는 항상 단리 기준으로 계산한다.
+    const s2 = Object.assign({}, state, { cd: rate - GASAN - FEE, addBasis: 'sheet' });
     const r = computeAll(unit, s2);
     const isCurrent = rate === base;
     html += `<tr${isCurrent ? ' data-current="1"' : ''}>` +
@@ -564,7 +538,7 @@ function renderTable3(unit) {
       `<td>${won(r.totalInterest)}</td>` +
       `</tr>`;
   });
-  document.getElementById('table3Body').innerHTML = html;
+  document.getElementById('table3Body').innerHTML = html0 + html;
 }
 
 /* ── 한도 강제 제한 ──────────────────────────── */
@@ -643,7 +617,6 @@ function render() {
   updateResults(r);
   updateSettingsPanel(r);
 
-  renderTable1(unit);
   renderTable2(unit);
   renderTable3(unit);
 }
