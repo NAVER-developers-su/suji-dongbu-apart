@@ -41,22 +41,22 @@
 
   <section class="facts">
     <div class="fact">
-      <span class="fact__label">종전평가액</span>
+      <span class="fact__label">종전평가액<button type="button" class="help" data-help="jongjeon" aria-label="설명 보기">i</button></span>
       <span class="fact__value" id="factPrev">0</span>
       <span class="fact__sub" id="factPrevSub"></span>
     </div>
     <div class="fact">
-      <span class="fact__label">종후평가액</span>
+      <span class="fact__label">종후평가액<button type="button" class="help" data-help="jonghu" aria-label="설명 보기">i</button></span>
       <span class="fact__value" id="factAfter">0</span>
       <span class="fact__sub" id="factAfterSub"></span>
     </div>
     <div class="fact">
-      <span class="fact__label">권리가액</span>
+      <span class="fact__label">권리가액<button type="button" class="help" data-help="gwonri" aria-label="설명 보기">i</button></span>
       <span class="fact__value" id="factRight">0</span>
       <span class="fact__sub" id="factRightSub"></span>
     </div>
     <div class="fact fact--key">
-      <span class="fact__label">분담금</span>
+      <span class="fact__label">분담금<button type="button" class="help" data-help="bundam" aria-label="설명 보기">i</button></span>
       <span class="fact__value" id="factDue">0</span>
       <span class="fact__sub" id="factDueSub"></span>
     </div>
@@ -67,7 +67,7 @@
 
       <section class="card">
         <div class="card__head">
-          <h2 class="card__title">매수 시점</h2>
+          <h2 class="card__title">매수 시점<button type="button" class="help" data-help="maesu" aria-label="설명 보기">i</button></h2>
         </div>
         <div class="card__body">
           <div class="choices">
@@ -108,11 +108,11 @@
       </section>
 
       <details class="card" id="settings">
-        <summary><span class="caret">▶</span>상세 설정<span class="summary__hint" id="settingsHint">5.28% · 55개월 · 단리</span></summary>
+        <summary><span class="caret">▶</span>상세 설정<span class="summary__hint" id="settingsHint">5.28% · 55개월 · 조합 대납</span></summary>
         <div class="card__body">
           <div class="settings">
             <div class="setting">
-              <div class="setting__label">CD 91일물 (%)</div>
+              <div class="setting__label">CD 91일물 (%)<button type="button" class="help" data-help="cd" aria-label="설명 보기">i</button></div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
                 <span class="stepper__val" id="setCd">2.92</span>
@@ -128,7 +128,16 @@
               </div>
             </div>
             <div class="setting">
-              <div class="setting__label">대출 기간 (개월)</div>
+              <div class="setting__label">이주비 기간 (개월)<button type="button" class="help" data-help="gigan" aria-label="설명 보기">i</button></div>
+              <div class="stepper">
+                <button type="button" data-step="-1">−</button>
+                <span class="stepper__val" id="setMonthsMove">55</span>
+                <button type="button" data-step="1">+</button>
+              </div>
+              <div class="setting__note">신한은행 제안은 60개월 이내입니다</div>
+            </div>
+            <div class="setting">
+              <div class="setting__label">추가사업비 기간 (개월)</div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
                 <span class="stepper__val" id="setMonths">55</span>
@@ -136,7 +145,7 @@
               </div>
             </div>
             <div class="setting">
-              <div class="setting__label">종후자산 LTV (%)</div>
+              <div class="setting__label">종후자산 LTV (%)<button type="button" class="help" data-help="ltv" aria-label="설명 보기">i</button></div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
                 <span class="stepper__val" id="setLtvAfter">90</span>
@@ -161,14 +170,14 @@
               </div>
             </div>
             <div class="setting setting--wide">
-              <div class="setting__label">이자 계산 방식</div>
+              <div class="setting__label">이자 계산 방식<button type="button" class="help" data-help="bangsik" aria-label="설명 보기">i</button></div>
               <div class="segmented">
                 <label><input type="radio" name="method" value="simple">단리</label>
-                <label><input type="radio" name="method" value="month" checked>월복리</label>
+                <label><input type="radio" name="method" value="proxy" checked>조합 대납</label>
               </div>
             </div>
             <div class="setting">
-              <div class="setting__label">십만원 단위 절사·올림</div>
+              <div class="setting__label">십만원 단위 절사·올림<button type="button" class="help" data-help="rounding" aria-label="설명 보기">i</button></div>
               <div class="segmented">
                 <label><input type="radio" name="rounding" value="on" checked>적용</label>
                 <label><input type="radio" name="rounding" value="off">미적용</label>
@@ -187,10 +196,10 @@
         <div class="card__body">
           <div class="loan">
             <div class="loan__top">
-              <span class="loan__name">이주비 대출</span>
+              <span class="loan__name">이주비 대출<button type="button" class="help" data-help="ijubi" aria-label="설명 보기">i</button></span>
               <span class="loan__rate" id="rateMove">연 4.50%</span>
             </div>
-            <div class="loan__cap">한도 <b id="capMove">0</b></div>
+            <div class="loan__cap">한도<button type="button" class="help" data-help="hando_move" aria-label="설명 보기">i</button> <b id="capMove">0</b></div>
             <div class="amount">
               <div class="amount__box">
                 <span class="amount__won">₩</span>
@@ -213,10 +222,10 @@
 
           <div class="loan">
             <div class="loan__top">
-              <span class="loan__name">추가사업비 대출 <span class="loan__rate">(실수령 원금)</span></span>
+              <span class="loan__name">추가사업비 대출<button type="button" class="help" data-help="chuga" aria-label="설명 보기">i</button> <span class="loan__rate">(실수령 원금)</span></span>
               <span class="loan__rate" id="rateAdd">연 5.28%</span>
             </div>
-            <div class="loan__cap">한도 <b id="capAdd">0</b> · 이주비 신청액이 늘면 줄어듭니다</div>
+            <div class="loan__cap">한도<button type="button" class="help" data-help="hando_add" aria-label="설명 보기">i</button> <b id="capAdd">0</b> · 이주비 신청액이 늘면 줄어듭니다</div>
             <div class="amount">
               <div class="amount__box">
                 <span class="amount__won">₩</span>
@@ -232,7 +241,7 @@
             </div>
             <div class="meter"><div class="meter__fill" id="meterAdd"></div></div>
             <div class="loan__foot">
-              <span>신청서 기재액(원금+이자) <b id="addFootApplied">0</b></span>
+              <span>신청서 기재액(원금+이자)<button type="button" class="help" data-help="sincheong" aria-label="설명 보기">i</button> <b id="addFootApplied">0</b></span>
               <span class="flag" id="addFlag"></span>
             </div>
           </div>
@@ -318,7 +327,7 @@
               <span class="line__value" id="lineAddInterest">0</span>
             </div>
             <div class="line line--warnish">
-              <span class="line__label">이자의 이자</span>
+              <span class="line__label">이자의 이자 (조합 대납분)<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></span>
               <span class="line__value" id="lineIoi">—</span>
             </div>
             <div class="line line--emph line--accent">
@@ -348,7 +357,7 @@
 
       <section class="card">
         <div class="card__head">
-          <h2 class="card__title">금리 민감도</h2>
+          <h2 class="card__title">금리 민감도<button type="button" class="help" data-help="mingam" aria-label="설명 보기">i</button></h2>
         </div>
         <div class="card__body">
           <div class="tablegroup">
@@ -399,5 +408,14 @@
 </div>
 
 <script src="app.js" defer></script>
+
+<dialog class="helpsheet" id="helpSheet">
+  <div class="helpsheet__inner">
+    <div class="helpsheet__grip"></div>
+    <h2 class="helpsheet__title" id="helpTitle"></h2>
+    <div class="helpsheet__body" id="helpBody"></div>
+    <button type="button" class="helpsheet__close" id="helpClose">닫기</button>
+  </div>
+</dialog>
 </body>
 </html>

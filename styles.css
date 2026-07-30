@@ -597,6 +597,146 @@ details[open] > summary { border-bottom: 1px solid var(--line); }
 
 /* ── 표 ───────────────────────────────────── */
 
+/* ── 용어 설명 (ⓘ) ────────────────────────── */
+
+.help {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-left: 5px;
+  display: inline-grid;
+  place-items: center;
+  vertical-align: -3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.help:active,
+.help:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+/* 탭 타깃을 손가락 크기로 넓히되 시각적 크기는 유지한다. */
+.help::before {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  margin: -11px;
+}
+
+.help { position: relative; }
+
+.helpsheet {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: fixed;
+  inset: auto 0 0 0;
+  max-height: 82vh;
+}
+
+.helpsheet::backdrop { background: rgba(16, 26, 25, 0.45); }
+
+.helpsheet__inner {
+  background: var(--surface);
+  border-top: 1px solid var(--line-strong);
+  border-radius: 14px 14px 0 0;
+  padding: 18px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  max-height: 82vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.helpsheet__grip {
+  width: 38px;
+  height: 4px;
+  border-radius: 100px;
+  background: var(--line-strong);
+  align-self: center;
+  margin-bottom: 2px;
+}
+
+.helpsheet__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.helpsheet__body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.helpsheet__body b { color: var(--accent-ink); font-weight: 600; }
+
+.helpsheet__body code {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink);
+}
+
+.helpsheet__note {
+  font-size: 12.5px;
+  color: var(--muted);
+  border-left: 2px solid var(--line-strong);
+  padding-left: 10px;
+}
+
+.helpsheet__close {
+  align-self: stretch;
+  min-height: var(--tap);
+  margin-top: 4px;
+  border: 0;
+  border-radius: var(--r);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (min-width: 620px) {
+  .helpsheet {
+    inset: 0;
+    margin: auto;
+    max-width: 440px;
+    max-height: 80vh;
+  }
+  .helpsheet__inner { border-radius: 10px; border: 1px solid var(--line-strong); }
+  .helpsheet__grip { display: none; }
+}
+
 /* ── 탭 ───────────────────────────────────── */
 
 .tabs {

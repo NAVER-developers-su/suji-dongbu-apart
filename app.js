@@ -37,18 +37,134 @@ const DEFAULTS = {
   cd: 2.92,
   moveRate: 4.50,
   months: 55,
+  monthsMove: 55,
   ltvAfter: 90,
   ltvBefore: 60,
   existing: 0,
-  method: 'month',
+  method: 'proxy',
   rounding: 'on',
 };
 
-const METHOD_LABEL = { simple: '단리', month: '월복리' };
+const METHOD_LABEL = { simple: '단리', proxy: '조합 대납' };
+
+const HELP = {
+  jongjeon: {
+    title: '종전평가액',
+    body:
+      '<p>리모델링 <b>전</b> 내 집의 감정평가 금액입니다. 삼창감정평가법인과 대화감정평가법인 두 곳이 각각 평가한 뒤 그 평균을 씁니다. 이주비 대출 한도가 이 금액을 기준으로 정해집니다.</p>' +
+      '<div class="helpsheet__note">참고: 2026년 정기총회 책자 303~319쪽 기준입니다.</div>',
+  },
+  jonghu: {
+    title: '종후평가액',
+    body:
+      '<p>리모델링 <b>후</b> 예상되는 감정평가 금액입니다. 역시 두 법인 평가의 평균입니다. 전체 대출 가능 총액이 이 금액의 90%로 정해집니다.</p>',
+  },
+  gwonri: {
+    title: '권리가액',
+    body:
+      '<p>종전평가액에 비례율을 곱한 금액으로, <b>내가 사업에 기여한 자산의 가치</b>입니다.</p>' +
+      '<code>권리가액 = 종전평가액 × 109.10%</code>' +
+      '<p>비례율 109.10%는 사업이 끝났을 때 조합원 자산이 얼마나 늘어나는지를 나타내는 비율입니다.</p>',
+  },
+  bundam: {
+    title: '분담금',
+    body:
+      '<p>리모델링 후 집을 받기 위해 <b>추가로 내야 하는 돈</b>입니다.</p>' +
+      '<code>분담금 = 종후평가액 − 권리가액</code>' +
+      '<p>새 집의 가치에서 내 몫으로 인정받은 가치를 뺀 차액입니다.</p>',
+  },
+  maesu: {
+    title: '매수 시점',
+    body:
+      '<p>집을 <b>언제 샀는지</b>에 따라 이주비 대출 한도가 달라집니다. 정부 부동산 대책 시행일이 기준입니다.</p>' +
+      '<p>2025년 6월 27일 이전에 사셨으면 종전평가액의 60%, 2025년 10월 15일 이후면 40%까지 빌릴 수 있습니다. 그 사이에 사셨다면 조합에 개별 상담을 받으셔야 합니다.</p>' +
+      '<div class="helpsheet__note">참고: 2025년 6월 27일 이전 매수라면 다주택자도 60%로 동일합니다.</div>',
+  },
+  ijubi: {
+    title: '이주비 대출',
+    body:
+      '<p>공사 기간에 <b>이사 나가 살 집을 구하는 비용</b>을 빌려주는 대출입니다. 취급은행은 신한은행이고 금리는 Cofix(6개월물)에 가산금리 1.60%를 더해 정해집니다.</p>' +
+      '<p>원금은 입주할 때 한 번에 갚고, 이자도 입주할 때 갚습니다. 중도상환이 가능하며 수수료는 없습니다.</p>' +
+      '<div class="helpsheet__note">참고: 금리는 자서 시점이 아니라 실제 대출금이 나가는 날 확정됩니다.</div>',
+  },
+  chuga: {
+    title: '추가사업비 대출',
+    body:
+      '<p>법이 정한 이주비 한도만으로는 이주가 어려운 분들을 위한 <b>추가 대출</b>입니다. 이주비보다 금리가 높습니다. 키움증권이 취급하며 만기일시상환이고 <b>중도상환이 불가</b>합니다.</p>' +
+      '<div class="helpsheet__note">참고: 신청할 때는 원금이 아니라 원금과 이자를 합한 금액을 적습니다.</div>',
+  },
+  hando_move: {
+    title: '이주비 한도',
+    body:
+      '<code>이주비 한도 = 종전평가액 × LTV</code>' +
+      '<p>매수 시점에 따라 LTV가 60% 또는 40%로 정해집니다.</p>',
+  },
+  hando_add: {
+    title: '추가사업비 한도',
+    body:
+      '<p>전체 대출 가능 총액에서 분담금과 이주비 신청액을 뺀 나머지가 추가사업비 몫입니다. 그런데 그 몫 안에 <b>원금과 만기까지의 이자가 함께</b> 들어가야 하므로, 실제로 손에 쥐는 원금은 이자계수로 나눈 값이 됩니다.</p>' +
+      '<code>잔여한도 = 종후평가액 × 90% − 분담금 − 이주비 신청액\n원금한도 = 잔여한도 ÷ (1 + 금리 ÷ 12 × 개월)</code>' +
+      '<div class="helpsheet__note">참고: 이주비를 많이 받을수록 추가사업비 한도는 줄어듭니다.</div>',
+  },
+  sincheong: {
+    title: '신청서 기재액',
+    body:
+      '<p>추가사업비 신청서에는 실제로 받을 원금이 아니라 <b>원금과 이자를 합한 금액</b>을 적습니다. 한도와 비교해야 하는 것도 이 금액입니다.</p>' +
+      '<code>기재액 = 원금 + 만기까지의 이자</code>',
+  },
+  cd: {
+    title: 'CD 91일물',
+    body:
+      '<p>은행끼리 91일 동안 돈을 빌릴 때 쓰는 <b>기준금리</b>입니다. 추가사업비 대출 금리가 여기에 연동됩니다.</p>' +
+      '<code>추가사업비 금리 = CD 91일물 + 가산금리 2.22% + 취급수수료 0.14%</code>' +
+      '<p>3개월마다 CD금리가 다시 정해지므로 대출 금리도 따라 바뀝니다.</p>' +
+      '<div class="helpsheet__note">참고: 2026년 6월 18일 기준 2.92%였고, 이때 합계가 연 5.28%였습니다.</div>',
+  },
+  gigan: {
+    title: '대출 기간',
+    body:
+      '<p><b>이주를 시작한 날부터 입주 기간이 끝나는 날까지</b>입니다. 조합 총회에서 55개월로 승인받았습니다.</p>' +
+      '<p>늦게 이사 나가고 빨리 들어오면 개인 기간은 줄어들 수 있습니다. 공사가 지연되면 조합과 금융기관이 협의해 조정하고, 연장이 필요하면 총회 승인을 받습니다.</p>' +
+      '<div class="helpsheet__note">참고: 신한은행 이주비 대출 제안서에는 대출실행일로부터 60개월 이내로 적혀 있어, 이주비 기간은 따로 조절할 수 있게 두었습니다.</div>',
+  },
+  bangsik: {
+    title: '이자 계산 방식',
+    body:
+      '<p>두 대출 모두 만기에 한 번에 갚고 이자도 후불이라, <b>쌓인 이자를 어떻게 처리하느냐</b>에 따라 총액이 달라집니다.</p>' +
+      '<p><b>단리</b>는 조합 공식 계산시트와 똑같이 원금에만 이자를 붙입니다. 서류에 적을 숫자를 맞춰볼 때 쓰세요.</p>' +
+      '<p><b>조합 대납</b>은 조합 안내문에 적힌 실제 구조입니다. 이주비 이자는 은행 조건상 매달 내야 하는데 조합원은 입주 때까지 내지 않으므로, 조합이 사업비 대출을 받아 대신 내주고 그 대납금에 이자가 붙습니다.</p>' +
+      '<div class="helpsheet__note">참고: 조합도 아직 신한은행에서 정확한 이자 계산서를 받지 못한 상태입니다.</div>',
+  },
+  rounding: {
+    title: '십만원 단위 절사·올림',
+    body:
+      '<p>조합 공식 계산시트는 한도를 십만원 아래로 <b>버리고</b>, 이자는 십만원 위로 <b>올립니다</b>. 시트와 숫자를 정확히 맞추려면 켜두세요. 끄면 원 단위로 계산합니다.</p>',
+  },
+  ltv: {
+    title: 'LTV',
+    body:
+      '<p>Loan To Value, 즉 <b>담보 가치 대비 대출 비율</b>입니다. 종후자산 LTV 90%는 리모델링 후 예상 가치의 90%까지만 전체 대출이 가능하다는 뜻입니다.</p>',
+  },
+  ioni: {
+    title: '이자의 이자',
+    body:
+      '<p>이주비 이자는 은행 조건상 <b>매달 내야만</b> 합니다. 그런데 조합원은 입주할 때까지 내지 않기로 했기 때문에, 그 사이 <b>조합이 사업비 대출을 받아 대신 내줍니다.</b> 조합이 빌린 그 돈에 다시 이자가 붙고, 입주할 때 조합원이 함께 갚습니다.</p>' +
+      '<code>이자의 이자 = 이주비원금 × (이주비금리÷12) × (추가사업비금리÷12) × n(n−1)÷2</code>' +
+      '<p>매달 발생한 이자가 만기까지 남은 개월 수만큼 이자를 낳기 때문에 n(n−1)÷2 항이 나옵니다.</p>' +
+      '<div class="helpsheet__note">참고: 복리가 아니라 별도 대출에서 생기는 이자입니다. 추가사업비에는 붙지 않습니다 — 신청액에 이자가 이미 포함돼 대납할 것이 없기 때문입니다.</div>',
+  },
+  mingam: {
+    title: '금리 민감도',
+    body:
+      '<p>추가사업비 금리가 오르면 총 이자가 얼마나 늘고 빌릴 수 있는 원금이 얼마나 줄어드는지 보여줍니다.</p>' +
+      '<p>금리가 오르면 이자계수가 커져서 같은 한도 안에 담을 수 있는 원금이 줄어듭니다. 즉 <b>이자는 늘고 손에 쥐는 돈은 줄어듭니다.</b></p>',
+  },
+};
 
 const STEPPER_CONFIG = {
   setCd: { step: 0.1, min: 0, max: 20, decimals: 2, key: 'cd' },
   setMoveRate: { step: 0.1, min: 0, max: 20, decimals: 2, key: 'moveRate' },
+  setMonthsMove: { step: 1, min: 1, max: 360, decimals: 0, key: 'monthsMove' },
   setMonths: { step: 1, min: 1, max: 360, decimals: 0, key: 'months' },
   setLtvAfter: { step: 5, min: 0, max: 100, decimals: 0, key: 'ltvAfter' },
   setLtvBefore: { step: 5, min: 0, max: 100, decimals: 0, key: 'ltvBefore' },
@@ -82,21 +198,16 @@ function parseAmount(str) {
 
 /* ── 계산 로직 ───────────────────────────────── */
 
-function factor(r, method, n) {
-  if (method === 'month') return Math.pow(1 + r / 12, n) - 1;
-  return r / 12 * n; // simple
-}
-
 function computeAll(unit, s) {
   const addRatePct = s.cd + GASAN + FEE;
   const rMove = s.moveRate / 100;
   const rAdd = addRatePct / 100;
-  const n = s.months;
+  const nMove = s.monthsMove;
+  const nAdd = s.months;
 
-  const fMove = factor(rMove, s.method, n);
-  const fAdd = factor(rAdd, s.method, n);
-  const fMoveS = rMove / 12 * n;
-  const fAddS = rAdd / 12 * n;
+  // 두 대출 모두 각자 원금에 대해서는 단리로만 이자가 붙는다.
+  const fMove = rMove / 12 * nMove;
+  const fAdd = rAdd / 12 * nAdd;
 
   const totalCap = unit.종후평균 * s.ltvAfter / 100;
   const moveCap = (s.mode === 'none') ? 0 : (unit.종전평균 * s.ltvBefore / 100);
@@ -105,6 +216,8 @@ function computeAll(unit, s) {
   const deduct = (s.mode === 'none') ? s.existing : moveAmount;
   const bucket = Math.max(0, totalCap - deduct - unit.분담금);
 
+  // 한도 공식은 조합 공식 계산시트 기준이라 이자 계산 방식과 무관하게
+  // 추가사업비의 단리 팩터만 사용한다.
   let addPrincipalCap = bucket / (1 + fAdd);
   addPrincipalCap = (s.rounding === 'on')
     ? Math.floor(addPrincipalCap / 100000) * 100000
@@ -120,11 +233,17 @@ function computeAll(unit, s) {
     : Math.round(addInterest);
   const addApplied = addPrincipal + addInterest;
 
-  const iOnI = Math.round(
-    moveAmount * (fMove - fMoveS) + addPrincipal * (fAdd - fAddS)
-  );
+  // 이자의 이자(이주비 전용): 이주비 이자는 은행 조건상 매월 후취라, 조합이
+  // 사업비 대출을 받아 대납하고 그 대납금에 사업비 금리가 붙는다. k개월차
+  // 대납금은 만기까지 (n−k)개월간 이자가 발생하므로 합이 n(n−1)/2 항이 된다.
+  // 추가사업비는 신청액 자체에 이자가 이미 포함되어 조합이 대납할 필요가
+  // 없으므로 이자의 이자가 발생하지 않는다.
+  const iOnI = (s.method === 'proxy')
+    ? Math.round(moveAmount * (rMove / 12) * (rAdd / 12) * nMove * (nMove - 1) / 2)
+    : 0;
+
   const totalLoan = moveAmount + addPrincipal;
-  const totalInterest = moveInterest + addInterest;
+  const totalInterest = moveInterest + addInterest + iOnI;
   const maturityTotal = totalLoan + totalInterest;
 
   return {
@@ -156,6 +275,7 @@ const state = {
   cd: DEFAULTS.cd,
   moveRate: DEFAULTS.moveRate,
   months: DEFAULTS.months,
+  monthsMove: DEFAULTS.monthsMove,
   ltvAfter: DEFAULTS.ltvAfter,
   ltvBefore: DEFAULTS.ltvBefore,
   existing: DEFAULTS.existing,
@@ -306,7 +426,8 @@ function updateSettingsPanel(r) {
 
   document.getElementById('rateBreakdown').innerHTML =
     `추가사업비 금리 = CD ${state.cd.toFixed(2)}% + 가산 ${GASAN.toFixed(2)}% + ` +
-    `취급수수료 ${FEE.toFixed(2)}% = 연 <b>${r.addRatePct.toFixed(2)}%</b>`;
+    `취급수수료 ${FEE.toFixed(2)}% = 연 <b>${r.addRatePct.toFixed(2)}%</b>` +
+    `<br>이자의 이자 = 이주비원금 × (이주비금리÷12) × (추가사업비금리÷12) × n(n−1)÷2`;
 }
 
 /* ── 경우별 비교 표 ──────────────────────────── */
@@ -346,7 +467,7 @@ function renderTable1(unit) {
 function renderTable2(unit) {
   const methods = [
     { key: 'simple', label: '단리' },
-    { key: 'month', label: '월복리' },
+    { key: 'proxy', label: '조합 대납' },
   ];
   let html = '';
   methods.forEach(m => {
@@ -515,8 +636,33 @@ function bindChips() {
   });
 }
 
+function bindHelp() {
+  const sheet = document.getElementById('helpSheet');
+  const title = document.getElementById('helpTitle');
+  const body = document.getElementById('helpBody');
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.help[data-help]');
+    if (!btn) return;
+    const entry = HELP[btn.dataset.help];
+    if (!entry) return;
+    title.textContent = entry.title;
+    body.innerHTML = entry.body;
+    sheet.showModal();
+  });
+
+  document.getElementById('helpClose').addEventListener('click', () => {
+    sheet.close();
+  });
+
+  sheet.addEventListener('click', (e) => {
+    if (e.target === sheet) sheet.close();
+  });
+}
+
 function bindEvents() {
   bindChips();
+  bindHelp();
 
   document.getElementById('selDong').addEventListener('change', render);
   document.getElementById('selFloor').addEventListener('change', render);
@@ -591,6 +737,7 @@ function bindEvents() {
     state.cd = DEFAULTS.cd;
     state.moveRate = DEFAULTS.moveRate;
     state.months = DEFAULTS.months;
+    state.monthsMove = DEFAULTS.monthsMove;
     state.ltvAfter = DEFAULTS.ltvAfter;
     state.ltvBefore = DEFAULTS.ltvBefore;
     state.existing = DEFAULTS.existing;
@@ -600,6 +747,7 @@ function bindEvents() {
     document.getElementById('setCd').textContent = DEFAULTS.cd.toFixed(2);
     document.getElementById('setMoveRate').textContent = DEFAULTS.moveRate.toFixed(2);
     document.getElementById('setMonths').textContent = String(DEFAULTS.months);
+    document.getElementById('setMonthsMove').textContent = String(DEFAULTS.monthsMove);
     document.getElementById('setLtvAfter').textContent = String(DEFAULTS.ltvAfter);
     document.getElementById('setLtvBefore').textContent = String(DEFAULTS.ltvBefore);
     document.getElementById('setExisting').value = won(DEFAULTS.existing);
