@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <title>수지동부아파트 리모델링 대출 계산기</title>
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 <div class="wrap">
@@ -113,13 +113,12 @@
           <div class="settings">
             <div class="setgroup">이주비 대출</div>
             <div class="setting">
-              <div class="setting__label">이주비 금리 (%)</div>
+              <div class="setting__label">이주비 금리 (%)<button type="button" class="help" data-help="ijubi_rate" aria-label="설명 보기">i</button></div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
                 <span class="stepper__val" id="setMoveRate">4.50</span>
                 <button type="button" data-step="1">+</button>
               </div>
-              <div class="setting__note">Cofix(6개월물) + 가산 1.60% · 실행일에 확정</div>
             </div>
             <div class="setting">
               <div class="setting__label">이주비 기간 (개월)<button type="button" class="help" data-help="gigan" aria-label="설명 보기">i</button></div>
@@ -128,16 +127,14 @@
                 <span class="stepper__val" id="setMonthsMove">55</span>
                 <button type="button" data-step="1">+</button>
               </div>
-              <div class="setting__note">신한은행 제안은 60개월 이내입니다</div>
             </div>
             <div class="setting">
-              <div class="setting__label">이주비 LTV (%)</div>
+              <div class="setting__label">이주비 LTV (%)<button type="button" class="help" data-help="hando_move" aria-label="설명 보기">i</button></div>
               <div class="stepper">
                 <button type="button" data-step="-1">−</button>
                 <span class="stepper__val" id="setLtvBefore">60</span>
                 <button type="button" data-step="1">+</button>
               </div>
-              <div class="setting__note">매수 시점 선택에 따라 자동으로 바뀝니다</div>
             </div>
             <div class="setting setting--wide">
               <div class="setting__label">이주비 이자 계산<button type="button" class="help" data-help="ioni" aria-label="설명 보기">i</button></div>
@@ -146,7 +143,6 @@
                 <label><input type="radio" name="moveIoi" value="monthly" checked>월복리</label>
                 <label><input type="radio" name="moveIoi" value="proxy">조합 대납</label>
               </div>
-              <div class="setting__note">단리는 이자의 이자를 계산하지 않습니다. 추가사업비 발표치가 월복리 계산과 일치해 이주비도 월복리를 기본값으로 둡니다.</div>
             </div>
 
             <div class="setgroup">추가사업비 대출</div>
@@ -172,7 +168,6 @@
                 <label><input type="radio" name="addBasis" value="sheet">조합 시트 (단리)</label>
                 <label><input type="radio" name="addBasis" value="notice" checked>조합 발표치</label>
               </div>
-              <div class="setting__note">조합 발표치는 2026.07.30 안내문 기준 1억당 이자 26,720,000원 · 이자의 이자 570,000원입니다.</div>
             </div>
 
             <div class="setgroup">공통</div>
@@ -185,14 +180,13 @@
               </div>
             </div>
             <div class="setting">
-              <div class="setting__label">기존 주담대 잔액</div>
+              <div class="setting__label">기존 주담대 잔액<button type="button" class="help" data-help="jondae" aria-label="설명 보기">i</button></div>
               <div class="amount">
                 <div class="amount__box">
                   <span class="amount__won">₩</span>
                   <input id="setExisting" type="text" inputmode="numeric" autocomplete="off" value="0">
                 </div>
               </div>
-              <div class="setting__note">이주비 미신청일 때만 한도에서 차감됩니다</div>
             </div>
             <div class="setting">
               <div class="setting__label">십만원 단위 절사·올림<button type="button" class="help" data-help="rounding" aria-label="설명 보기">i</button></div>
@@ -200,7 +194,6 @@
                 <label><input type="radio" name="rounding" value="on">적용</label>
                 <label><input type="radio" name="rounding" value="off" checked>미적용</label>
               </div>
-              <div class="setting__note">조합 시트의 자릿수 처리입니다. 켜면 시트 숫자와 정확히 일치합니다.</div>
             </div>
           </div>
           <div class="rate-breakdown" id="rateBreakdown"></div>
@@ -510,7 +503,7 @@
   <button type="button" class="bottombar__go" id="barGo">결과</button>
 </div>
 
-<script src="app.js?v=3" defer></script>
+<script src="app.js?v=4" defer></script>
 
 <dialog class="helpsheet" id="helpSheet">
   <div class="helpsheet__inner">
