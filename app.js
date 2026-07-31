@@ -45,9 +45,8 @@ const DEFAULTS = {
   ltvAfter: 90,
   ltvBefore: 60,
   existing: 0,
-  bizRate: 3.825,
-  addBasis: 'proxy',
-  moveIoi: 'proxy',
+  addBasis: 'notice',
+  moveIoi: 'monthly',
   rounding: 'off',
 };
 
@@ -148,11 +147,10 @@ const HELP = {
   bangsik: {
     title: '추가사업비 이자 계산',
     body:
-      '<p>추가사업비 대출의 이자를 <b>어떤 방식으로 계산할지</b> 정합니다. 조합이 내놓은 숫자가 <b>서로 다른 세 가지</b>라, 계산기도 셋 다 제공합니다.</p>' +
-      '<p><b>① 조합 시트(단리)</b> — 조합이 배포한 엑셀 계산시트의 산식입니다. 원금 × 연이율 ÷ 12 × 개월수로 계산하며, 1억당 24,200,000원입니다.</p>' +
-      '<p><b>② 조합 발표치</b> — 2026.07.30 안내문에 실린 값입니다. 1억당 대출금 이자 26,720,000원 + 이자의 이자 570,000원이 붙는다고 안내했습니다.</p>' +
-      '<p><b>③ 간이계산 (기본값)</b> — 2026.08.01 조합이 새로 내놓은 답변 시트의 산식입니다. 미납이자 풀에 사업비 대출 이율 3.825%가 매월 붙는 구조로, 1억·55개월 기준 이자 총 26,405,017원(단리분 24,200,000원 + 이자의 이자 2,205,017원)입니다.</p>' +
-      '<div class="helpsheet__note">참고: 세 값이 서로 다릅니다. 간이계산이 가장 최근 조합 답변이지만, 시트에 "(확인 필)" 표기가 있어 아직 확정값은 아닙니다.</div>',
+      '<p>추가사업비 대출의 이자를 <b>어떤 방식으로 계산할지</b> 정합니다.</p>' +
+      '<p><b>조합 시트(단리)</b>는 조합 공식 계산시트와 똑같이 원금 × 연이율 ÷ 12 × 개월수로 계산합니다.</p>' +
+      '<p><b>조합 발표치</b>는 2026년 7월 30일 조합 안내문에 실린 실제 값입니다. 추가 이주비 1억원당 대출금 이자 26,720,000원, 이자의 이자 570,000원이 붙는다고 안내했습니다 — 즉 추가사업비도 단순 단리 계산보다 이자가 더 붙는다는 뜻입니다.</p>' +
+      '<div class="helpsheet__note">참고: 조합은 이 값이 현재 금리로 일괄계산한 금액이며 단리 기준이라고 밝혔습니다. 조합도 아직 신한은행에서 정확한 이자 계산서를 받지 못한 상태입니다.</div>',
   },
   rounding: {
     title: '십만원 단위 절사·올림',
@@ -169,23 +167,18 @@ const HELP = {
     title: '이자의 이자',
     body:
       '<p>만기까지 이자를 한 푼도 내지 않기 때문에, <b>그 사이 쌓인 이자에 다시 붙는 이자</b>입니다.</p>' +
-      '<p>구조는 2026.08.01 조합 간이계산 시트로 확정됩니다 — <b>미납이자 풀에 사업비 대출 이율(3.825%)이 매월 붙는 구조</b>입니다.</p>' +
-      '<code>이자총액 = 원금 × (대출금리÷사업비금리) × [(1+사업비금리÷12)ⁿ − 1]</code>' +
-      '<p>이 이자총액에서 단리분(원금 × 대출금리 ÷ 12 × n)을 뺀 나머지가 이자의 이자입니다. 이주비·추가사업비 모두 이 구조(간이계산)를 기본값으로 쓰며, <b>단리</b>를 고르면 이자의 이자는 0입니다.</p>' +
-      '<div class="helpsheet__note">참고: 간이계산 시트에 "(확인 필)" 표기가 있어 완전히 확정된 값은 아닙니다.</div>',
+      '<p><b>추가사업비</b> — 조합이 2026.07.30 안내문에서 <b>1억당 이자의 이자 약 570,000원</b>이라고 공표했습니다. 기본값(조합 발표치)이 이 비율을 그대로 적용합니다. 이 발표치는 5.28% 월복리 55개월 총이자와 0.1% 이내로 일치합니다 — 실제 계산은 월복리로 이루어진 것으로 보입니다.</p>' +
+      '<p><b>이주비</b> — 조합 공표값은 아직 없습니다(신한은행 이자 계산서 대기 중). 발표치가 월복리 계산과 일치하므로 이주비도 <b>미납이자에 이주비 금리로 월복리가 붙는 것(월복리)을 기본값</b>으로 둡니다.</p>' +
+      '<code>월복리 = 원금 × [(1+금리÷12)ⁿ − 1 − 금리÷12×n]</code>' +
+      '<p>다른 선택지: <b>단리</b>(이자의 이자를 계산하지 않음), <b>조합 대납</b>(안내문의 대납 구조 — 조합이 사업비 대출로 이자를 대납하고 대납금에 사업비 금리가 붙는 추정).</p>' +
+      '<div class="helpsheet__note">참고: 은행 이자 계산서가 나오면 기본값을 확정값으로 바꿉니다.</div>',
   },
   mingam: {
     title: '금리 민감도',
     body:
       '<p>금리가 오르면 총 이자가 얼마나 느는지 보여줍니다. 이주비 금리는 실행일에야 확정되고, 추가사업비 금리는 CD에 연동돼 3개월마다 바뀌므로 둘 다 지금은 가정입니다.</p>' +
       '<p>금리가 오르면 이자계수가 커져서 같은 한도 안에 담을 수 있는 원금이 줄어듭니다. 즉 <b>이자는 늘고 손에 쥐는 돈은 줄어듭니다.</b></p>' +
-      '<div class="helpsheet__note">참고: 이 표는 간이계산(대납) 기준으로 계산합니다. 조합 발표치는 금리와 무관한 고정 비율(1억당 2,672만)이라 민감도 표에는 반영되지 않습니다.</div>',
-  },
-  bizrate: {
-    title: '사업비 대출 이율',
-    body:
-      '<p>조합이 <b>미납이자를 대납</b>하는 데 쓰는 사업비 대출의 금리입니다. 매달 쌓인 이자 풀에 이 금리가 월 단위로 붙어 이자의 이자가 됩니다.</p>' +
-      '<div class="helpsheet__note">참고: 2026.08.01 조합 간이계산 시트의 고정 가정 3.825%입니다. 파일에 "(확인 필)"이 붙어 있어 확정값은 아닙니다.</div>',
+      '<div class="helpsheet__note">참고: 조합 발표치는 금리와 무관한 고정 비율(1억당 2,672만)이라, 이 표는 조합 시트(단리) 기준으로 계산합니다.</div>',
   },
 };
 
@@ -196,7 +189,6 @@ const STEPPER_CONFIG = {
   setMonths: { step: 1, min: 1, max: 360, decimals: 0, key: 'months' },
   setLtvAfter: { step: 5, min: 0, max: 100, decimals: 0, key: 'ltvAfter' },
   setLtvBefore: { step: 5, min: 0, max: 100, decimals: 0, key: 'ltvBefore' },
-  setBizRate: { step: 0.1, min: 0, max: 20, decimals: 3, key: 'bizRate' },
 };
 
 /* ── 포맷 헬퍼 ───────────────────────────────── */
@@ -227,31 +219,18 @@ function parseAmount(str) {
 
 /* ── 계산 로직 ───────────────────────────────── */
 
-// 조합 간이계산(2026.08.01): 미납이자 풀에 사업비 대출 이율이 매월 붙는 구조의 닫힌 형태.
-function proxyFactor(rLoan, rBiz, n) {
-  if (rBiz <= 0) return rLoan / 12 * n; // 사업비 금리 0이면 단리와 같다
-  const i = rBiz / 12;
-  return (rLoan / rBiz) * (Math.pow(1 + i, n) - 1);
-}
-
 function computeAll(unit, s) {
   const addRatePct = s.cd + GASAN + FEE;
   const rMove = s.moveRate / 100;
   const rAdd = addRatePct / 100;
-  const rBiz = s.bizRate / 100;
   const nMove = s.monthsMove;
   const nAdd = s.months;
 
-  const moveSimple = rMove / 12 * nMove;
-
-  // 추가사업비 이자계수: 간이계산(2026.08.01 조합 답변 시트 — 미납이자에 사업비
-  // 대출 이율이 매월 붙는 구조)을 기본으로 쓰거나, 조합 발표치(2026.07.30 안내문의
-  // 1억당 정률)나 조합 공식 계산시트 그대로 단리(원금 × 연이율 ÷ 12 × 개월)를 쓴다.
-  const addSimple = rAdd / 12 * nAdd;
-  const addFactor =
-    (s.addBasis === 'proxy') ? proxyFactor(rAdd, rBiz, nAdd) :
-    (s.addBasis === 'notice') ? NOTICE_ADD_INTEREST_RATE :
-    addSimple;
+  // 추가사업비 이자계수: 조합 발표치(2026.07.30 안내문의 1억당 정률)를 쓰거나,
+  // 조합 공식 계산시트 그대로 단리(원금 × 연이율 ÷ 12 × 개월)를 쓴다.
+  // 이주비는 항상 단리다.
+  const addFactor = (s.addBasis === 'notice') ? NOTICE_ADD_INTEREST_RATE : (rAdd / 12 * nAdd);
+  const moveFactor = rMove / 12 * nMove;
 
   const totalCap = unit.종후평균 * s.ltvAfter / 100;
   const moveCap = (s.mode === 'none') ? 0 : Math.floor(unit.종전평균 * s.ltvBefore / 100);
@@ -260,8 +239,7 @@ function computeAll(unit, s) {
   const deduct = (s.mode === 'none') ? s.existing : moveAmount;
   const bucket = Math.max(0, totalCap - deduct - unit.분담금);
 
-  // 한도는 실제로 적용할 이자계수(addFactor)와 일관되게 계산한다 — 세 기준 모두
-  // capFactor(신청액 대비 원금 비율)가 addFactor와 같은 값이 되도록 맞춰져 있다.
+  // 한도는 실제로 적용할 이자계수(addFactor)와 일관되게 계산한다.
   let addPrincipalCap = bucket / (1 + addFactor);
   addPrincipalCap = (s.rounding === 'on')
     ? Math.floor(addPrincipalCap / 100000) * 100000
@@ -270,39 +248,32 @@ function computeAll(unit, s) {
 
   const addPrincipal = s.amtAdd;
 
-  const moveInterest = Math.round(moveAmount * moveSimple);
+  const moveInterest = Math.round(moveAmount * moveFactor);
 
   // 이주비 이자의 이자.
-  // none:  단리 — 이자의 이자를 계산하지 않는다.
-  // proxy: 조합 간이계산(2026.08.01) — 미납이자 풀에 사업비 대출 이율(rBiz)이
-  //        매월 붙는 구조. proxyFactor의 닫힌 형태에서 단리분을 뺀 나머지가
-  //        이자의 이자다.
-  const moveIoi = (s.moveIoi === 'proxy')
-    ? Math.round(moveAmount * (proxyFactor(rMove, rBiz, nMove) - moveSimple))
-    : 0;
+  // monthly: 미납이자에 이주비 금리로 월복리가 붙는다고 본다 — 조합 발표치(추가
+  //          사업비 1억당 2,672만+57만)가 월복리 계산과 일치해 기본값으로 둔다.
+  // proxy:   조합이 사업비 대출로 이자를 대납하고 대납금에 사업비 금리가 붙는
+  //          구조(2026.07.30 안내문). k개월차 대납금이 만기까지 (n−k)개월 이자를
+  //          낳아 n(n−1)/2 항이 된다.
+  const moveIoi =
+    (s.moveIoi === 'monthly')
+      ? Math.round(moveAmount * (Math.pow(1 + rMove / 12, nMove) - 1 - moveFactor))
+      : (s.moveIoi === 'proxy')
+        ? Math.round(moveAmount * (rMove / 12) * (rAdd / 12) * nMove * (nMove - 1) / 2)
+        : 0;
 
-  // 추가사업비 이자: 간이계산·조합 시트는 단리분(addSimple)을, 조합 발표치는
-  // 안내문의 고정 비율을 신청액에 적용한다 — 이자 항목 자체는 항상 단리 성격이고,
-  // 이자의 이자는 아래에서 별도로 더한다.
-  const addInterestRate = (s.addBasis === 'notice') ? NOTICE_ADD_INTEREST_RATE : addSimple;
-  let addInterest = addPrincipal * addInterestRate;
+  let addInterest = addPrincipal * addFactor;
   addInterest = (s.rounding === 'on')
     ? Math.ceil(addInterest / 100000) * 100000
     : Math.round(addInterest);
 
-  // 추가사업비 이자의 이자: 간이계산은 addFactor(전체 계수)에서 단리분을 뺀
-  // 나머지, 조합 발표치는 안내문 고정 비율(1억당 570,000원), 조합 시트는 0
-  // (신청액에 이미 포함되어 있다고 가정).
-  const addIoi =
-    (s.addBasis === 'proxy') ? Math.round(addPrincipal * (addFactor - addSimple)) :
-    (s.addBasis === 'notice') ? Math.round(addPrincipal * NOTICE_ADD_IOI_RATE) :
-    0;
+  // 추가사업비 이자의 이자: 조합 발표치 기준에서는 실제로 발생한다(1억당
+  // 570,000원). 조합 시트(단리) 기준에서는 신청액에 이자가 이미 포함되어
+  // 있다고 가정하므로 0이다.
+  const addIoi = (s.addBasis === 'notice') ? Math.round(addPrincipal * NOTICE_ADD_IOI_RATE) : 0;
 
-  // 신청서 기재액: 간이계산은 원금+이자 전체(이자의 이자 포함)를 적어야 한도와
-  // 맞아떨어진다. 조합 시트·발표치는 기존과 같이 원금+이자만 적는다.
-  const addApplied = (s.addBasis === 'proxy')
-    ? addPrincipal + addInterest + addIoi
-    : addPrincipal + addInterest;
+  const addApplied = addPrincipal + addInterest;
 
   const moveSubtotal = moveAmount + moveInterest + moveIoi;
   const addSubtotal = addPrincipal + addInterest + addIoi;
@@ -312,7 +283,7 @@ function computeAll(unit, s) {
   const maturityTotal = totalLoan + totalInterest;
 
   return {
-    addRatePct, moveFactor: moveSimple, addFactor,
+    addRatePct, moveFactor, addFactor,
     totalCap, moveCap, moveAmount, deduct, bucket,
     addPrincipalCap, addCapInterest, addPrincipal,
     moveInterest, addInterest, addApplied,
@@ -345,7 +316,6 @@ const state = {
   ltvAfter: DEFAULTS.ltvAfter,
   ltvBefore: DEFAULTS.ltvBefore,
   existing: DEFAULTS.existing,
-  bizRate: DEFAULTS.bizRate,
   addBasis: DEFAULTS.addBasis,
   moveIoi: DEFAULTS.moveIoi,
   rounding: DEFAULTS.rounding,
@@ -479,16 +449,6 @@ function updateResults(r) {
   document.getElementById('lineTotalLoan').textContent = won(r.totalLoan);
   document.getElementById('lineTotalInterest').textContent = won(r.totalInterest);
 
-  // 한도 카드 — 두 대출의 한도를 맨 위에 보여준다.
-  if (state.mode === 'none') {
-    document.getElementById('lineCapMove').textContent = '—';
-  } else if (state.mode === 'consult') {
-    document.getElementById('lineCapMove').textContent = '상담 필요';
-  } else {
-    document.getElementById('lineCapMove').textContent = won(r.moveCap);
-  }
-  document.getElementById('lineCapAdd').textContent = won(r.addPrincipalCap);
-
   // 이주비 대출 블록
   document.getElementById('headMoveRate').textContent =
     `연 ${state.moveRate.toFixed(2)}% · ${state.monthsMove}개월`;
@@ -499,14 +459,13 @@ function updateResults(r) {
   document.getElementById('lineMoveSub').textContent = won(r.moveSubtotal);
 
   // 추가사업비 대출 블록
-  document.getElementById('headAddRate').textContent =
-    (state.addBasis === 'proxy') ? `연 ${r.addRatePct.toFixed(2)}% + 대납 ${state.bizRate.toFixed(3)}%` :
-    (state.addBasis === 'notice') ? '조합 발표치 · 1억당 이자 2,672만' :
-    `연 ${r.addRatePct.toFixed(2)}% · ${state.months}개월`;
+  document.getElementById('headAddRate').textContent = (state.addBasis === 'notice')
+    ? '조합 발표치 · 1억당 이자 2,672만'
+    : `연 ${r.addRatePct.toFixed(2)}% · ${state.months}개월`;
   document.getElementById('lineAddPrincipal2').textContent = won(r.addPrincipal);
   document.getElementById('lineAddInterest').textContent = won(r.addInterest);
   document.getElementById('lineAddIoi').textContent =
-    (state.addBasis === 'sheet') ? '—' : won(r.addIoi);
+    (state.addBasis !== 'notice') ? '—' : won(r.addIoi);
   document.getElementById('lineAddSub').textContent = won(r.addSubtotal);
 
   document.getElementById('lineTotalLoan2').textContent = won(r.totalLoan);
@@ -518,16 +477,14 @@ function updateResults(r) {
 }
 
 function updateSettingsPanel(r) {
-  document.getElementById('settingsHint').textContent =
-    (state.addBasis === 'proxy') ? '조합 간이계산' :
-    (state.addBasis === 'notice') ? '조합 발표치' :
-    '조합 시트 (단리)';
+  document.getElementById('settingsHint').textContent = (state.addBasis === 'notice')
+    ? '조합 발표치'
+    : '조합 시트 (단리)';
 
   document.getElementById('rateBreakdown').innerHTML =
     `추가사업비 금리 = CD ${state.cd.toFixed(2)}% + 가산 ${GASAN.toFixed(2)}% + ` +
     `취급수수료 ${FEE.toFixed(2)}% = 연 <b>${r.addRatePct.toFixed(2)}%</b>` +
-    `<br>간이계산 이자총액 = 원금 × (대출금리÷사업비금리) × [(1+사업비금리÷12)ⁿ − 1] ` +
-    `(사업비 대출 이율 ${state.bizRate.toFixed(3)}%)`;
+    `<br>이자의 이자 = 이주비원금 × (이주비금리÷12) × (추가사업비금리÷12) × n(n−1)÷2`;
 }
 
 /* ── 경우별 비교 표 ──────────────────────────── */
@@ -578,11 +535,11 @@ function renderTable3(unit) {
   let html = '';
   let html0 = '';
   if (state.addBasis === 'notice') {
-    html0 = `<tr class="note-row"><td colspan="4">조합 발표치는 금리와 무관한 고정 비율이라, 이 표는 간이계산(대납) 기준으로 금리 영향을 보여줍니다.</td></tr>`;
+    html0 = `<tr class="note-row"><td colspan="4">조합 발표치는 금리와 무관한 고정 비율이라, 이 표는 조합 시트(단리) 기준으로 금리 영향을 보여줍니다.</td></tr>`;
   }
   rates.forEach(rate => {
-    // 발표치는 금리를 반영하지 않으므로 민감도는 항상 간이계산(대납, 금리에 반응) 기준으로 계산한다.
-    const s2 = Object.assign({}, state, { cd: rate - GASAN - FEE, addBasis: 'proxy' });
+    // 발표치는 금리를 반영하지 않으므로 민감도는 항상 단리 기준으로 계산한다.
+    const s2 = Object.assign({}, state, { cd: rate - GASAN - FEE, addBasis: 'sheet' });
     const r = computeAll(unit, s2);
     const isCurrent = rate === base;
     html += `<tr${isCurrent ? ' data-current="1"' : ''}>` +
@@ -820,14 +777,12 @@ function bindEvents() {
     // 이주비 LTV는 현재 선택된 매수 시점과 어긋나지 않게 재유도한다.
     state.ltvBefore = (state.mode === 'ltv40') ? 40 : DEFAULTS.ltvBefore;
     state.existing = DEFAULTS.existing;
-    state.bizRate = DEFAULTS.bizRate;
     state.addBasis = DEFAULTS.addBasis;
     state.moveIoi = DEFAULTS.moveIoi;
     state.rounding = DEFAULTS.rounding;
 
     document.getElementById('setCd').textContent = DEFAULTS.cd.toFixed(2);
     document.getElementById('setMoveRate').textContent = DEFAULTS.moveRate.toFixed(2);
-    document.getElementById('setBizRate').textContent = DEFAULTS.bizRate.toFixed(3);
     document.getElementById('setMonths').textContent = String(DEFAULTS.months);
     document.getElementById('setMonthsMove').textContent = String(DEFAULTS.monthsMove);
     document.getElementById('setLtvAfter').textContent = String(DEFAULTS.ltvAfter);
